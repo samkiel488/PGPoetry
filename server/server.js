@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const poemRoutes = require('./routes/poems');
@@ -28,7 +29,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use('/client', express.static('client'));
-app.use('/admin', express.static('admin'));
+app.use('/admin/css', express.static('admin/css'));
+app.use('/admin/js', express.static('admin/js'));
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -36,28 +38,33 @@ app.use('/api/poems', poemRoutes);
 
 // Serve client pages
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/../client/index.html');
+  res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
 });
 
 app.get('/poems', (req, res) => {
-  res.sendFile(__dirname + '/../client/poems.html');
+  res.sendFile(path.join(__dirname, '..', 'client', 'poems.html'));
 });
 
 app.get('/poem/:slug', (req, res) => {
-  res.sendFile(__dirname + '/../client/poem.html');
+  res.sendFile(path.join(__dirname, '..', 'client', 'poem.html'));
 });
 
 // Serve admin pages
 app.get('/admin', (req, res) => {
-  res.sendFile(__dirname + '/../admin/login.html');
+  res.sendFile(path.join(__dirname, '..', 'admin', 'login.html'));
 });
 
 app.get('/admin/dashboard', (req, res) => {
-  res.sendFile(__dirname + '/../admin/dashboard.html');
+  res.sendFile(path.join(__dirname, '..', 'admin', 'dashboard.html'));
+});
+
+// Note: If you add more /api/poems/* routes, place them BEFORE /api/poems/:slug to avoid route conflicts.
+app.get('/api/poems/:slug', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'poem.html'));
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URL, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
