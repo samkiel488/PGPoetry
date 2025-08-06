@@ -27,11 +27,9 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use('/css', express.static(path.join(__dirname, '..', 'client', 'css')));
-app.use('/js', express.static(path.join(__dirname, '..', 'client', 'js')));
-app.use('/admin/css', express.static(path.join(__dirname, '..', 'admin', 'css')));
-app.use('/admin/js', express.static(path.join(__dirname, '..', 'admin', 'js')));
+// Serve static files - Updated for Render deployment
+app.use(express.static(path.join(__dirname, '..', 'client')));
+app.use(express.static(path.join(__dirname, '..', 'admin')));
 
 // API routes
 app.use('/api/auth', authRoutes);
