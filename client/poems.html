@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poems - PGPoetry</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-brand">
+                <h1>PGPoetry</h1>
+                <p>Priceless Gift Poetry</p>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link">Home</a></li>
+                <li><a href="/poems" class="nav-link active">Poems</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main">
+        <section class="poems-section">
+            <div class="poems-header">
+                <h2 class="section-title">All Poems</h2>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search poems..." class="search-input">
+                </div>
+            </div>
+            
+            <div class="poems-grid" id="poems-container">
+                <!-- Poems will be loaded here -->
+            </div>
+            
+            <div class="loading" id="loading">
+                <p>Loading poems...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 PGPoetry. All rights reserved.</p>
+    </footer>
+
+    <script src="js/poems.js"></script>
+</body>
+</html> 
