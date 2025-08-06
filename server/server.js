@@ -31,6 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/client', express.static('client'));
 app.use('/admin/css', express.static('admin/css'));
 app.use('/admin/js', express.static('admin/js'));
+app.use('/css', express.static(path.join(__dirname, '..', 'client', 'css')));
+app.use('/js', express.static(path.join(__dirname, '..', 'client', 'js')));
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -69,7 +71,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   useUnifiedTopology: true,
 })
 .then(() => {
-  console.log('Connected to MongoDB');
+  console.log('Server is Now Live🙌🙌');
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Client: http://localhost:${PORT}`);
