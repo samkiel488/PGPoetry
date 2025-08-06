@@ -80,14 +80,23 @@ async function loadPoems() {
         const container = document.getElementById('poems-container');
         const loading = document.getElementById('loading');
         loading.style.display = 'none';
-        container.innerHTML = '<p style="text-align: center; color: #e74c3c; grid-column: 1 / -1;">Error loading poems. Please try again later.</p>';
+        container.innerHTML = '';
+        iziToast.error({
+            title: 'Error',
+            message: 'Error loading poems. Please try again later.',
+            position: 'topRight'
+        });
     }
 }
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     loadPoems();
-    
+    // Set copyright year
+    const yearSpan = document.getElementById('copyright-year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
     // Set up search functionality
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', (e) => {

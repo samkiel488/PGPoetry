@@ -53,20 +53,24 @@ const createPoem = async (req, res) => {
 const updatePoem = async (req, res) => {
   try {
     const { title, content, tags, featured } = req.body;
-    const slug = slugify(title, { lower: true, strict: true });
-    
+    const updateData = { content, tags, featured };
+    if (title) {
+      updateData.title = title;
+      updateData.slug = slugify(title, { lower: true, strict: true });
+    }
     const poem = await Poem.findByIdAndUpdate(
       req.params.id,
-      { title, slug, content, tags, featured },
+      updateData,
       { new: true, runValidators: true }
     );
-
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
-
     res.json(poem);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'A poem with this title already exists' });
+    }
     res.status(500).json({ message: 'Error updating poem' });
   }
 };

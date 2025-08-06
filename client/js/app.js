@@ -55,11 +55,21 @@ async function loadFeaturedPoems() {
     } catch (error) {
         console.error('Error loading featured poems:', error);
         const container = document.getElementById('featured-poems');
-        container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poems. Please try again later.</p>';
+        container.innerHTML = '';
+        iziToast.error({
+            title: 'Error',
+            message: 'Error loading poems. Please try again later.',
+            position: 'topRight'
+        });
     }
 }
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     loadFeaturedPoems();
+    // Set copyright year
+    const yearSpan = document.getElementById('copyright-year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
 }); 

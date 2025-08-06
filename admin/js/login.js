@@ -41,13 +41,11 @@ loginForm.addEventListener('submit', async (e) => {
 
 // Show error message
 function showError(message) {
-    errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
-    
-    // Hide error after 5 seconds
-    setTimeout(() => {
-        errorMessage.style.display = 'none';
-    }, 5000);
+    iziToast.error({
+        title: 'Error',
+        message: message,
+        position: 'topRight'
+    });
 }
 
 // Check if user is already logged in

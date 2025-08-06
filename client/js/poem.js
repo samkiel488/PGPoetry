@@ -39,13 +39,12 @@ async function loadPoem() {
         
     } catch (error) {
         console.error('Error loading poem:', error);
-        container.innerHTML = `
-            <div style="text-align: center; padding: 2rem;">
-                <h2 style="color: #e74c3c;">Poem Not Found</h2>
-                <p style="color: #7f8c8d;">The poem you're looking for doesn't exist or has been removed.</p>
-                <a href="/poems" class="btn btn-primary" style="margin-top: 1rem;">Back to Poems</a>
-            </div>
-        `;
+        container.innerHTML = '';
+        iziToast.error({
+            title: 'Error',
+            message: 'Poem not found or has been removed.',
+            position: 'topRight'
+        });
     } finally {
         loading.style.display = 'none';
     }
@@ -54,4 +53,9 @@ async function loadPoem() {
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     loadPoem();
+    // Set copyright year
+    const yearSpan = document.getElementById('copyright-year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
 }); 

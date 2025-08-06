@@ -65,26 +65,28 @@ app.get('/api/poems/:slug', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'poem.html'));
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('Server is Now Live🙌🙌');
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Client: http://localhost:${PORT}`);
-    console.log(`Admin: http://localhost:${PORT}/admin`);
-  });
-})
-.catch((error) => {
-  console.error('MongoDB connection error:', error);
-  process.exit(1);
-});
+// Remove or comment out the following for Vercel:
+// mongoose.connect(process.env.MONGODB_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// })
+// .then(() => {
+//   console.log('Server is Now Live🙌🙌');
+//   app.listen(PORT, () => {
+//     console.log(`Server running on port ${PORT}`);
+//     console.log(`Client: http://localhost:${PORT}`);
+//     console.log(`Admin: http://localhost:${PORT}/admin`);
+//   });
+// })
+// .catch((error) => {
+//   console.error('MongoDB connection error:', error);
+//   process.exit(1);
+// });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
-}); 
+});
+
+module.exports = app; 

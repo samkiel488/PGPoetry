@@ -140,11 +140,19 @@ poemForm.addEventListener('submit', async (e) => {
             loadPoems();
         } else {
             const data = await response.json();
-            alert(data.message || 'Error saving poem');
+            iziToast.error({
+                title: 'Error',
+                message: data.message || 'Error saving poem',
+                position: 'topRight'
+            });
         }
     } catch (error) {
         console.error('Error saving poem:', error);
-        alert('Network error. Please try again.');
+        iziToast.error({
+            title: 'Error',
+            message: 'Network error. Please try again.',
+            position: 'topRight'
+        });
     }
 });
 
@@ -162,11 +170,19 @@ async function deletePoem(poemId) {
             loadPoems();
         } else {
             const data = await response.json();
-            alert(data.message || 'Error deleting poem');
+            iziToast.error({
+                title: 'Error',
+                message: data.message || 'Error deleting poem',
+                position: 'topRight'
+            });
         }
     } catch (error) {
         console.error('Error deleting poem:', error);
-        alert('Network error. Please try again.');
+        iziToast.error({
+            title: 'Error',
+            message: 'Network error. Please try again.',
+            position: 'topRight'
+        });
     }
 }
 
