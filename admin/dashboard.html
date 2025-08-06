@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PGPoetry</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="header-content">
+            <h1>PGPoetry Admin</h1>
+            <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>Manage Poems</h2>
+                <button id="new-poem-btn" class="btn btn-primary">New Poem</button>
+            </div>
+
+            <div class="poems-list" id="poems-list">
+                <!-- Poems will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- New/Edit Poem Modal -->
+    <div id="poem-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">New Poem</h3>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            
+            <form id="poem-form" class="poem-form">
+                <div class="form-group">
+                    <label for="poem-title">Title</label>
+                    <input type="text" id="poem-title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="poem-content">Content</label>
+                    <textarea id="poem-content" name="content" rows="10" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="poem-tags">Tags (comma-separated)</label>
+                    <input type="text" id="poem-tags" name="tags" placeholder="love, nature, life">
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="poem-featured" name="featured">
+                        Featured Poem
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Poem</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html> 
