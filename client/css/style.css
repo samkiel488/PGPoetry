@@ -48,6 +48,45 @@ body {
     line-height: 1.6;
     color: #333;
     background-color: #fafafa;
+    transition: background 0.3s, color 0.3s;
+}
+
+body.dark {
+    background: #181c24 !important;
+    color: #f1f1f1 !important;
+}
+
+body.dark a {
+    color: #7ecfff;
+}
+
+body.dark .card {
+    background: #232b39;
+    color: #f1f1f1;
+}
+
+body.dark .tag {
+    background: #2c3e50;
+    color: #fff;
+}
+
+body.dark input, body.dark textarea, body.dark select {
+    background: #232b39;
+    color: #f1f1f1;
+    border-color: #444;
+}
+
+body.dark .btn {
+    background: #222e3c;
+    color: #fff;
+}
+body.dark .btn:hover {
+    background: #1a2230;
+}
+
+body.dark .theme-toggle {
+    background: #222e3c;
+    color: #fff;
 }
 
 /* Typography */

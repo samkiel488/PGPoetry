@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 </head>
 <body>
+    <button class="theme-toggle" id="theme-toggle">🌙 Dark</button>
     <header class="header">
         <nav class="nav">
             <div class="nav-brand">
@@ -46,5 +47,29 @@
     </footer>
 
     <script src="js/app.js"></script>
+    <script>
+    // Theme toggle logic (shared for all pages)
+    function setTheme(dark) {
+        if (dark) {
+            document.body.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('theme-toggle').textContent = '☀️ Light';
+        } else {
+            document.body.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            document.getElementById('theme-toggle').textContent = '🌙 Dark';
+        }
+    }
+    function initTheme() {
+        const theme = localStorage.getItem('theme');
+        setTheme(theme === 'dark');
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        initTheme();
+        document.getElementById('theme-toggle').onclick = function() {
+            setTheme(!document.body.classList.contains('dark'));
+        };
+    });
+    </script>
 </body>
 </html> 
