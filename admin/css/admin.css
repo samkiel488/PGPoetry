@@ -1,3 +1,59 @@
+/* Dark theme styles */
+body.dark-theme {
+    background-color: #181a1b;
+    color: #e0e0e0;
+}
+.dark-theme .dashboard-container,
+.dark-theme .modal-content,
+.dark-theme .login-card {
+    background: #23272b;
+    color: #e0e0e0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.dark-theme .poem-item {
+    background: #23272b;
+    border-left: 4px solid #e74c3c;
+}
+.dark-theme .poem-item h3,
+.dark-theme .header-content h1,
+.dark-theme .dashboard-header h2 {
+    color: #fff;
+}
+.dark-theme .btn,
+.dark-theme .btn-primary,
+.dark-theme .btn-secondary,
+.dark-theme .btn-danger,
+.dark-theme .btn-edit {
+    color: #fff;
+}
+.dark-theme .btn-primary {
+    background: #c0392b;
+}
+.dark-theme .btn-secondary {
+    background: #636e72;
+}
+.dark-theme .btn-danger {
+    background: #e74c3c;
+}
+.dark-theme .btn-edit {
+    background: #2980b9;
+}
+.dark-theme .modal {
+    background: rgba(0,0,0,0.8);
+}
+.dark-theme .form-group input,
+.dark-theme .form-group textarea {
+    background: #23272b;
+    color: #e0e0e0;
+    border-color: #444;
+}
+.dark-theme .form-group input:focus,
+.dark-theme .form-group textarea:focus {
+    border-color: #e74c3c;
+}
+.dark-theme .poem-meta {
+    color: #b2bec3;
+}
 /* Reset and base styles */
 * {
     margin: 0;

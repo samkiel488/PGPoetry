@@ -19,6 +19,15 @@ router.post('/', auth, createPoem);
 router.put('/:id', auth, updatePoem);
 router.delete('/:id', auth, deletePoem);
 
+// Like a poem (public)
+router.post('/:id/like', async (req, res, next) => {
+  try {
+    await require('../controllers/poemController').likePoem(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Add route for getting poem by id (for admin edit modal)
 router.get('/id/:id', auth, async (req, res) => {
   const Poem = require('../models/Poem');
