@@ -11,9 +11,13 @@ const getAllPoems = async (req, res) => {
   }
 };
 
-// Get single poem by slug
+// Get single poem by slug (public)
 const getPoemBySlug = async (req, res) => {
   try {
+    // Only match slug, not id
+    if (!/^[a-z0-9-]+$/.test(req.params.slug)) {
+      return res.status(400).json({ message: 'Invalid poem slug' });
+    }
     const poem = await Poem.findOne({ slug: req.params.slug });
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
@@ -53,19 +57,19 @@ const createPoem = async (req, res) => {
 const updatePoem = async (req, res) => {
   try {
     const { title, content, tags, featured } = req.body;
-    const updateData = { content, tags, featured };
-    if (title) {
-      updateData.title = title;
-      updateData.slug = slugify(title, { lower: true, strict: true });
-    }
-    const poem = await Poem.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    // Find the poem first
+    const poem = await Poem.findById(req.params.id);
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
+    if (title) {
+      poem.title = title;
+      poem.slug = slugify(title, { lower: true, strict: true });
+    }
+    if (content !== undefined) poem.content = content;
+    if (tags !== undefined) poem.tags = tags;
+    if (featured !== undefined) poem.featured = featured;
+    await poem.save();
     res.json(poem);
   } catch (error) {
     if (error.code === 11000) {

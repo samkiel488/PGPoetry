@@ -1,3 +1,26 @@
+/* Like button styles */
+.like-btn {
+    background: #fff;
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+    border-radius: 20px;
+    padding: 0.3rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, color 0.2s;
+}
+.like-btn .like-icon {
+    font-size: 1.2rem;
+}
+.like-btn.liked, .like-btn:hover {
+    background: #e74c3c;
+    color: #fff;
+    border-color: #e74c3c;
+}
 /* Reset and base styles */
 * {
     margin: 0;

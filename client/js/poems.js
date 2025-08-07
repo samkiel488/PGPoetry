@@ -34,8 +34,22 @@ function createPoemCard(poem) {
                 <span class="poem-date">${formatDate(poem.createdAt)}</span>
                 <div class="poem-tags">${tags}</div>
             </div>
+            <button class="like-btn" onclick="event.stopPropagation(); likePoem(event, '${poem._id}')">
+                <span class="like-icon">&#10084;</span> <span class="like-text">Like</span>
+            </button>
         </div>
     `;
+// Like button handler
+function likePoem(event, poemId) {
+    // You can implement backend call here if needed
+    const btn = event.currentTarget;
+    btn.classList.toggle('liked');
+    if (btn.classList.contains('liked')) {
+        btn.querySelector('.like-text').textContent = 'Liked';
+    } else {
+        btn.querySelector('.like-text').textContent = 'Like';
+    }
+}
 }
 
 // Filter poems based on search term

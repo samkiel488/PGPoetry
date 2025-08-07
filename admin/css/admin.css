@@ -214,6 +214,19 @@ body {
     gap: 0.5rem;
 }
 
+.poem-actions .btn-secondary {
+    background: #7f8c8d;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.poem-actions .btn-secondary:hover {
+    background: #636e72;
+}
+
 /* Modal styles */
 .modal {
     position: fixed;

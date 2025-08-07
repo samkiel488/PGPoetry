@@ -72,10 +72,28 @@ function renderPoems() {
                 <div class="poem-actions">
                     <button class="btn btn-edit" onclick="editPoem('${poem._id}')">Edit</button>
                     <button class="btn btn-danger" onclick="deletePoem('${poem._id}')">Delete</button>
+                    <button class="btn btn-secondary" onclick="copyPoemLink('${poem.slug}')">Copy Link</button>
                 </div>
             </div>
         </div>
     `).join('');
+// Copy poem link to clipboard
+function copyPoemLink(slug) {
+    const url = `${window.location.origin}/poems/${slug}`;
+    navigator.clipboard.writeText(url).then(() => {
+        iziToast.success({
+            title: 'Copied',
+            message: 'Poem link copied to clipboard!',
+            position: 'topRight'
+        });
+    }, () => {
+        iziToast.error({
+            title: 'Error',
+            message: 'Failed to copy link',
+            position: 'topRight'
+        });
+    });
+}
 }
 
 // Open modal for new poem
@@ -87,20 +105,23 @@ function openNewPoemModal() {
 }
 
 // Open modal for editing poem
-function editPoem(poemId) {
-    const poem = poems.find(p => p._id === poemId);
-    if (!poem) return;
-    
-    currentPoemId = poemId;
-    modalTitle.textContent = 'Edit Poem';
-    
-    // Fill form with poem data
-    document.getElementById('poem-title').value = poem.title;
-    document.getElementById('poem-content').value = poem.content;
-    document.getElementById('poem-tags').value = poem.tags.join(', ');
-    document.getElementById('poem-featured').checked = poem.featured;
-    
-    poemModal.style.display = 'flex';
+async function editPoem(poemId) {
+    try {
+        const response = await fetch(`${API_BASE}/poems/id/${poemId}`, {
+            headers: getAuthHeaders()
+        });
+        if (!response.ok) throw new Error('Poem not found');
+        const poem = await response.json();
+        currentPoemId = poemId;
+        modalTitle.textContent = 'Edit Poem';
+        document.getElementById('poem-title').value = poem.title;
+        document.getElementById('poem-content').value = poem.content;
+        document.getElementById('poem-tags').value = poem.tags.join(', ');
+        document.getElementById('poem-featured').checked = poem.featured;
+        poemModal.style.display = 'flex';
+    } catch (e) {
+        iziToast.error({ title: 'Error', message: 'Could not load poem for editing', position: 'topRight' });
+    }
 }
 
 // Close modal
