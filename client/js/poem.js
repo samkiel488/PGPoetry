@@ -14,7 +14,9 @@ function formatDate(dateString) {
 
 // Load and display poem
 async function loadPoem() {
-    const slug = window.location.pathname.split('/').pop();
+    // Support /poems/:slug and /poem/:slug
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const slug = pathParts[pathParts.length - 1];
     const container = document.getElementById('poem-container');
     const loading = document.getElementById('loading');
     try {
@@ -30,6 +32,7 @@ async function loadPoem() {
                 <div class="poem-actions">
                     <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
                     <button class="share-btn" id="share-btn">Share</button>
+                    <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
                 </div>
             </div>
             <div class="poem-content">${poem.content}</div>
@@ -47,10 +50,10 @@ async function loadPoem() {
                             const data = await res.json();
                             likeBtn.querySelector('.like-count').textContent = data.likes;
                         } else {
-                            iziToast.error({ title: 'Error', message: 'Could not like poem', position: 'topRight' });
+                            alert('Could not like poem.');
                         }
                     } catch {
-                        iziToast.error({ title: 'Error', message: 'Network error', position: 'topRight' });
+                        alert('Network error.');
                     }
                     likeBtn.disabled = false;
                 };
@@ -67,23 +70,31 @@ async function loadPoem() {
                             url
                         });
                     } else {
-                        navigator.clipboard.writeText(url);
-                        iziToast.success({
-                            title: 'Copied',
-                            message: 'Link copied to clipboard!',
-                            position: 'topRight'
-                        });
+                        alert('Share not supported on this device. Use the copy link button.');
                     }
+                };
+            }
+            const copyBtn = document.getElementById('copy-link-btn');
+            if (copyBtn) {
+                copyBtn.onclick = function(e) {
+                    e.preventDefault();
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url).then(() => {
+                        alert('Link copied to clipboard!');
+                    }, () => {
+                        alert('Failed to copy link.');
+                    });
                 };
             }
         }, 0);
     } catch (error) {
         console.error('Error loading poem:', error);
         container.innerHTML = '';
-        iziToast.error({
-            title: 'Error',
-            message: 'Poem not found or has been removed.',
-            position: 'topRight'
+        // Show a custom 404 page if available, else fallback
+        fetch('/404.html').then(r => r.text()).then(html => {
+            document.body.innerHTML = html;
+        }).catch(() => {
+            alert('Poem not found or has been removed.');
         });
     } finally {
         loading.style.display = 'none';

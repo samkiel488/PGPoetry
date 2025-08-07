@@ -75,8 +75,14 @@ mongoose.connect(process.env.MONGODB_URI, {
   process.exit(1);
 });
 
+
+// 404 handler for unknown routes (must be after all other routes)
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, '..', 'client', '404.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
-}); 
+});
