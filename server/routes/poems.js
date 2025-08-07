@@ -6,7 +6,8 @@ const {
   getPoemBySlug,
   createPoem,
   updatePoem,
-  deletePoem
+  deletePoem,
+  likePoem
 } = require('../controllers/poemController');
 
 // Public routes
@@ -37,5 +38,8 @@ router.post('/slur', async (req, res) => {
   const hasSlur = slurWords.some(word => text.toLowerCase().includes(word));
   res.json({ hasSlur, filtered: hasSlur ? text.replace(new RegExp(slurWords.join('|'), 'gi'), '***') : text });
 });
+
+// Like poem route
+router.post('/:id/like', likePoem);
 
 module.exports = router; 

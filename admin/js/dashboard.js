@@ -70,13 +70,33 @@ function renderPoems() {
             <div class="poem-meta">
                 <span>${formatDate(poem.createdAt)}</span>
                 <div class="poem-actions">
-                    <button class="btn btn-edit" onclick="editPoem('${poem._id}')">Edit</button>
-                    <button class="btn btn-danger" onclick="deletePoem('${poem._id}')">Delete</button>
-                    <button class="btn btn-secondary" onclick="copyPoemLink('${poem.slug}')">Copy Link</button>
+                    <button class="btn btn-edit" type="button" data-id="${poem._id}">Edit</button>
+                    <button class="btn btn-danger" type="button" data-id="${poem._id}">Delete</button>
+                    <button class="btn btn-secondary" type="button" data-slug="${poem.slug}">Copy Link</button>
                 </div>
             </div>
         </div>
     `).join('');
+
+    // Attach event listeners after rendering
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            editPoem(btn.getAttribute('data-id'));
+        };
+    });
+    document.querySelectorAll('.btn-danger').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            deletePoem(btn.getAttribute('data-id'));
+        };
+    });
+    document.querySelectorAll('.btn-secondary').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            copyPoemLink(btn.getAttribute('data-slug'));
+        };
+    });
 // Copy poem link to clipboard
 function copyPoemLink(slug) {
     const url = `${window.location.origin}/poems/${slug}`;

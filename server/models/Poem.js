@@ -28,6 +28,10 @@ const poemSchema = new mongoose.Schema({
   featured: {
     type: Boolean,
     default: false
+  },
+  likes: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

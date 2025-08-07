@@ -1,3 +1,18 @@
+/* Share button styles */
+.share-btn {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0.3rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.share-btn:hover {
+    background: #217dbb;
+}
 /* Like button styles */
 .like-btn {
     background: #fff;

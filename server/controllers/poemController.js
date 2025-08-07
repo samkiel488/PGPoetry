@@ -94,10 +94,27 @@ const deletePoem = async (req, res) => {
   }
 };
 
+const likePoem = async (req, res) => {
+  try {
+    const poem = await Poem.findById(req.params.id);
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+    
+    poem.likes += 1;
+    await poem.save();
+    
+    res.json({ likes: poem.likes });
+  } catch (error) {
+    res.status(500).json({ message: 'Error liking poem' });
+  }
+};
+
 module.exports = {
   getAllPoems,
   getPoemBySlug,
   createPoem,
   updatePoem,
-  deletePoem
-}; 
+  deletePoem,
+  likePoem
+};

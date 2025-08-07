@@ -44,7 +44,9 @@ app.get('/poems', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'poems.html'));
 });
 
-app.get('/poem/:slug', (req, res) => {
+
+// Serve poem.html for both /poem/:slug and /poems/:slug
+app.get(['/poem/:slug', '/poems/:slug'], (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'client', 'poem.html'));
 });
 
