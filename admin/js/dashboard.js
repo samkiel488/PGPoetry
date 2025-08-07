@@ -138,6 +138,11 @@ poemForm.addEventListener('submit', async (e) => {
         if (response.ok) {
             closePoemModal();
             loadPoems();
+            iziToast.success({
+                title: 'Success',
+                message: currentPoemId ? 'Poem updated successfully!' : 'Poem created successfully!',
+                position: 'topRight'
+            });
         } else {
             const data = await response.json();
             iziToast.error({
