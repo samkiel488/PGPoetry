@@ -203,6 +203,30 @@ body.dark .poem-card::before {
 body.dark .poem-article {
     background: #232b39;
     color: #f1f1f1;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+body.dark .poem-content {
+    color: #f1f1f1;
+}
+
+body.dark .poem-content::before,
+body.dark .poem-content::after {
+    color: #e74c3c;
+    opacity: 0.5;
+}
+
+body.dark .poem-header {
+    border-bottom-color: #444;
+}
+
+body.dark .poem-header h1 {
+    color: #f1f1f1;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+body.dark .poem-date {
+    color: #b2bec3;
 }
 
 body.dark .header {
@@ -657,31 +681,54 @@ h1, h2, h3, h4, h5, h6 {
 /* Tag filters */
 .tag-filters {
     display: flex;
-    gap: 1rem;
+    gap: 0.8rem;
     margin-bottom: 2rem;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .tag-filter {
     background: #ecf0f1;
     color: #2c3e50;
     border: none;
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.tag-filter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.tag-filter:hover::before {
+    left: 100%;
 }
 
 .tag-filter:hover {
     background: #e74c3c;
     color: #fff;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
 }
 
 .tag-filter.active {
-    background: #e74c3c;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
 }
 
 /* Poems section header */
