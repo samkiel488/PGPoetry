@@ -15,7 +15,7 @@
             <h1>PGPoetry Admin</h1>
             <nav>
                 <a href="/" class="btn btn-secondary">Go to Public Site</a>
-                <button id="theme-toggle" class="btn btn-secondary" type="button">Toggle Theme</button>
+                <button class="theme-toggle" id="theme-toggle"><span id="theme-icon">🌙</span> <span id="theme-label">Dark</span></button>
                 <button id="logout-btn" class="btn btn-secondary">Logout</button>
             </nav>
         </div
@@ -86,24 +86,39 @@
 
     <script src="/js/dashboard.js"></script>
     <script>
-    // Theme toggle logic
-    const themeToggle = document.getElementById('theme-toggle');
+    // Fancy Theme toggle logic for admin
     function setTheme(dark) {
         if (dark) {
             document.body.classList.add('dark-theme');
             localStorage.setItem('theme', 'dark');
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-label').textContent = 'Light';
         } else {
             document.body.classList.remove('dark-theme');
             localStorage.setItem('theme', 'light');
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-label').textContent = 'Dark';
         }
     }
-    themeToggle.addEventListener('click', function() {
-        setTheme(!document.body.classList.contains('dark-theme'));
-    });
-    // On load, set theme from localStorage
-    if (localStorage.getItem('theme') === 'dark') {
-        setTheme(true);
+    function initTheme() {
+        const theme = localStorage.getItem('theme');
+        setTheme(theme === 'dark');
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        initTheme();
+        document.getElementById('theme-toggle').onclick = function() {
+            setTheme(!document.body.classList.contains('dark-theme'));
+        };
+        const formActions = document.querySelector('.form-actions');
+        if (formActions && !document.getElementById('preview-btn')) {
+            const previewBtn = document.createElement('button');
+            previewBtn.type = 'button';
+            previewBtn.id = 'preview-btn';
+            previewBtn.className = 'btn btn-secondary';
+            previewBtn.textContent = 'Preview';
+            formActions.insertBefore(previewBtn, formActions.firstChild);
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function() {
         const formActions = document.querySelector('.form-actions');

@@ -43,21 +43,23 @@
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="theme-toggle">🌙 Dark</button>
+    <button class="theme-toggle" id="theme-toggle"><span id="theme-icon">🌙</span> <span id="theme-label">Dark</span></button>
     <h1 class="notfound-title">404</h1>
     <div class="notfound-msg">Sorry, the page you are looking for does not exist.</div>
     <a href="/" class="btn">Go Home</a>
     <script>
-    // Theme toggle logic (shared for all pages)
+    // Fancy Theme toggle logic
     function setTheme(dark) {
         if (dark) {
             document.body.classList.add('dark');
             localStorage.setItem('theme', 'dark');
-            document.getElementById('theme-toggle').textContent = '☀️ Light';
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-label').textContent = 'Light';
         } else {
             document.body.classList.remove('dark');
             localStorage.setItem('theme', 'light');
-            document.getElementById('theme-toggle').textContent = '🌙 Dark';
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-label').textContent = 'Dark';
         }
     }
     function initTheme() {

@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 </head>
 <body>
-    <button class="theme-toggle" id="theme-toggle">🌙 Dark</button>
+    <button class="theme-toggle" id="theme-toggle"><span id="theme-icon">🌙</span> <span id="theme-label">Dark</span></button>
     <header class="header">
         <nav class="nav">
             <div class="nav-brand">
@@ -58,16 +58,18 @@
 
     <script src="js/poems.js"></script>
     <script>
-    // Theme toggle logic (shared for all pages)
+    // Fancy Theme toggle logic
     function setTheme(dark) {
         if (dark) {
             document.body.classList.add('dark');
             localStorage.setItem('theme', 'dark');
-            document.getElementById('theme-toggle').textContent = '☀️ Light';
+            document.getElementById('theme-icon').textContent = '☀️';
+            document.getElementById('theme-label').textContent = 'Light';
         } else {
             document.body.classList.remove('dark');
             localStorage.setItem('theme', 'light');
-            document.getElementById('theme-toggle').textContent = '🌙 Dark';
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-label').textContent = 'Dark';
         }
     }
     function initTheme() {

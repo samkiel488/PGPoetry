@@ -22,19 +22,29 @@
     padding: 0.3rem 1.2rem;
     font-size: 1rem;
     cursor: pointer;
-    margin-top: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: background 0.2s, color 0.2s;
 }
-.like-btn .like-icon {
-    font-size: 1.2rem;
-}
-.like-btn.liked, .like-btn:hover {
-    background: #e74c3c;
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #e74c3c 100%);
     color: #fff;
-    border-color: #e74c3c;
+    border: none;
+    border-radius: 50px;
+    padding: 0.7rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    cursor: pointer;
+    z-index: 1000;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    outline: none;
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+.theme-toggle:hover {
 }
 /* Reset and base styles */
 * {
