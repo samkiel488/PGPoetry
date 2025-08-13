@@ -1,7 +1,7 @@
 {
   "name": "pgpoetry",
   "version": "1.0.0",
-  "description": "Priceless Gift Poetry - A minimalist, emotion-driven blog for publishing original poems",
+  "description": "Every verse, a priceless gift. - A minimalist, emotion-driven blog for publishing original poems",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

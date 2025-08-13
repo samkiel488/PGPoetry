@@ -1,4 +1,4 @@
-# PGPoetry - Priceless Gift Poetry
+# PGPoetry - Every verse, a priceless gift.
 
 A minimalist, emotion-driven blog designed for publishing original written poems to the public.
 
