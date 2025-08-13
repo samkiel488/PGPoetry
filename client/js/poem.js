@@ -1,32 +1,136 @@
 // API base URL
 const API_BASE = '/api';
 
-// Utility function to format date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+// Console logging utility
+function log(message, type = 'info') {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+    
+    switch(type) {
+        case 'error':
+            console.error(logMessage);
+            break;
+        case 'warn':
+            console.warn(logMessage);
+            break;
+        case 'success':
+            console.log(`%c${logMessage}`, 'color: green; font-weight: bold;');
+            break;
+        default:
+            console.log(logMessage);
+    }
 }
 
+// Enhanced error handling for fetch requests
+async function fetchWithErrorHandling(url, options = {}) {
+    try {
+        log(`Making ${options.method || 'GET'} request to: ${url}`, 'info');
+        
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            log(`HTTP ${response.status}: ${errorText}`, 'error');
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const data = await response.json();
+        log(`Request successful: ${url}`, 'success');
+        return data;
+    } catch (error) {
+        log(`Request failed: ${url} - ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+// Enhanced notification system
+function showNotification(message, type = 'info', title = '') {
+    log(`Showing notification: ${type} - ${title} - ${message}`, 'info');
+    
+    const config = {
+        title: title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info'),
+        message: message,
+        position: 'topRight',
+        timeout: type === 'error' ? 8000 : 5000,
+        closeOnClick: true,
+        pauseOnHover: true
+    };
+
+    try {
+        switch(type) {
+            case 'success':
+                iziToast.success(config);
+                break;
+            case 'error':
+                iziToast.error(config);
+                break;
+            case 'warning':
+                iziToast.warning(config);
+                break;
+            default:
+                iziToast.info(config);
+        }
+    } catch (error) {
+        log(`Notification system error: ${error.message}`, 'error');
+        // Fallback to alert if iziToast is not available
+        alert(`${config.title}: ${config.message}`);
+    }
+}
+
+// Utility function to format date
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    } catch (error) {
+        log(`Date formatting error: ${error.message}`, 'error');
+        return 'Invalid Date';
+    }
+}
+
+// Calculate reading statistics
+function calculateReadingStats(content) {
+    try {
+        const words = content.trim().split(/\s+/).length;
+        const minutes = Math.max(1, Math.round(words / 200));
+        return { words, minutes };
+    } catch (error) {
+        log(`Reading stats calculation error: ${error.message}`, 'error');
+        return { words: 0, minutes: 1 };
+    }
+}
 
 // Load and display poem
 async function loadPoem() {
-    // Support /poems/:slug and /poem/:slug
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
-    const slug = pathParts[pathParts.length - 1];
-    const container = document.getElementById('poem-container');
-    const loading = document.getElementById('loading');
     try {
-        const response = await fetch(`${API_BASE}/poems/${slug}`);
-        if (!response.ok) throw new Error('Poem not found');
-        const poem = await response.json();
+        log('Loading poem...', 'info');
+        
+        // Support /poems/:slug and /poem/:slug
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const slug = pathParts[pathParts.length - 1];
+        
+        log(`Extracted slug: ${slug}`, 'info');
+        
+        const container = document.getElementById('poem-container');
+        const loading = document.getElementById('loading');
+        
+        if (!container) {
+            log('Poem container not found', 'error');
+            return;
+        }
+        
+        const poem = await fetchWithErrorHandling(`${API_BASE}/poems/${slug}`);
+        
+        log(`Poem loaded successfully: ${poem.title}`, 'success');
+        
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
-        const words = poem.content.trim().split(/\s+/).length;
-        const minutes = Math.max(1, Math.round(words / 200));
-        container.innerHTML = `
+        const { words, minutes } = calculateReadingStats(poem.content);
+        
+        const poemHTML = `
             <div class="poem-header">
                 <h1>${poem.title}</h1>
                 <p class="poem-date">${formatDate(poem.createdAt)}</p>
@@ -44,86 +148,172 @@ async function loadPoem() {
                 <span id="poem-views">${poem.views || 0} views</span>
             </div>
         `;
-        // Like button logic
-        setTimeout(() => {
-            const likeBtn = document.getElementById('like-btn');
-            if (likeBtn) {
-                likeBtn.onclick = async function(e) {
-                    e.preventDefault();
-                    likeBtn.disabled = true;
-                    try {
-                        const res = await fetch(`${API_BASE}/poems/${poem._id}/like`, { method: 'POST' });
-                        if (res.ok) {
-                            const data = await res.json();
-                            likeBtn.querySelector('.like-count').textContent = data.likes;
-                        } else {
-                            alert('Could not like poem.');
-                        }
-                    } catch {
-                        alert('Network error.');
-                    }
-                    likeBtn.disabled = false;
-                };
-            }
-            const shareBtn = document.getElementById('share-btn');
-            if (shareBtn) {
-                shareBtn.onclick = function(e) {
-                    e.preventDefault();
-                    const url = window.location.href;
-                    if (navigator.share) {
-                        navigator.share({
-                            title: poem.title,
-                            text: poem.content.substring(0, 100) + '...',
-                            url
-                        });
-                    } else {
-                        alert('Share not supported on this device. Use the copy link button.');
-                    }
-                };
-            }
-            const copyBtn = document.getElementById('copy-link-btn');
-            if (copyBtn) {
-                copyBtn.onclick = function(e) {
-                    e.preventDefault();
-                    const url = window.location.href;
-                    navigator.clipboard.writeText(url).then(() => {
-                        alert('Link copied to clipboard!');
-                    }, () => {
-                        alert('Failed to copy link.');
-                    });
-                };
-            }
-        }, 0);
+        
+        container.innerHTML = poemHTML;
+        log('Poem HTML rendered successfully', 'success');
+        
+        // Setup interactive elements
+        setupPoemInteractions(poem);
+        
     } catch (error) {
-        console.error('Error loading poem:', error);
-        container.innerHTML = '';
+        log(`Error loading poem: ${error.message}`, 'error');
+        
+        const container = document.getElementById('poem-container');
+        if (container) {
+            container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poem.</p>';
+        }
+        
         // Show a custom 404 page if available, else fallback
-        fetch('/404.html').then(r => r.text()).then(html => {
-            document.body.innerHTML = html;
-        }).catch(() => {
-            alert('Poem not found or has been removed.');
-        });
+        try {
+            const response = await fetch('/404.html');
+            if (response.ok) {
+                const html = await response.text();
+                document.body.innerHTML = html;
+                log('404 page loaded successfully', 'success');
+            } else {
+                throw new Error('404 page not found');
+            }
+        } catch (fallbackError) {
+            log(`404 fallback failed: ${fallbackError.message}`, 'error');
+            showNotification('Poem not found or has been removed.', 'error');
+        }
     } finally {
-        loading.style.display = 'none';
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
+}
+
+// Setup poem interactions (like, share, copy)
+function setupPoemInteractions(poem) {
+    try {
+        log('Setting up poem interactions...', 'info');
+        
+        // Like button logic
+        const likeBtn = document.getElementById('like-btn');
+        if (likeBtn) {
+            likeBtn.onclick = async function(e) {
+                e.preventDefault();
+                log('Like button clicked', 'info');
+                
+                likeBtn.disabled = true;
+                try {
+                    const data = await fetchWithErrorHandling(`${API_BASE}/poems/${poem._id}/like`, { method: 'POST' });
+                    likeBtn.querySelector('.like-count').textContent = data.likes;
+                    log(`Poem liked successfully. New count: ${data.likes}`, 'success');
+                    showNotification('Poem liked!', 'success');
+                } catch (error) {
+                    log(`Error liking poem: ${error.message}`, 'error');
+                    showNotification('Could not like poem. Please try again.', 'error');
+                } finally {
+                    likeBtn.disabled = false;
+                }
+            };
+            log('Like button setup completed', 'success');
+        }
+        
+        // Share button logic
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.onclick = function(e) {
+                e.preventDefault();
+                log('Share button clicked', 'info');
+                
+                const url = window.location.href;
+                if (navigator.share) {
+                    navigator.share({
+                        title: poem.title,
+                        text: poem.content.substring(0, 100) + '...',
+                        url
+                    }).then(() => {
+                        log('Poem shared successfully', 'success');
+                        showNotification('Poem shared!', 'success');
+                    }).catch((error) => {
+                        log(`Share failed: ${error.message}`, 'error');
+                        showNotification('Share cancelled or failed.', 'warning');
+                    });
+                } else {
+                    log('Share API not supported, showing fallback message', 'warn');
+                    showNotification('Share not supported on this device. Use the copy link button.', 'warning');
+                }
+            };
+            log('Share button setup completed', 'success');
+        }
+        
+        // Copy link button logic
+        const copyBtn = document.getElementById('copy-link-btn');
+        if (copyBtn) {
+            copyBtn.onclick = function(e) {
+                e.preventDefault();
+                log('Copy link button clicked', 'info');
+                
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    log('Link copied to clipboard successfully', 'success');
+                    showNotification('Link copied to clipboard!', 'success');
+                }, (error) => {
+                    log(`Failed to copy link: ${error.message}`, 'error');
+                    showNotification('Failed to copy link.', 'error');
+                });
+            };
+            log('Copy link button setup completed', 'success');
+        }
+        
+        log('All poem interactions setup completed', 'success');
+        
+    } catch (error) {
+        log(`Error setting up poem interactions: ${error.message}`, 'error');
+    }
+}
+
+// Setup scroll to top functionality
+function setupScrollToTop() {
+    try {
+        const scrollBtn = document.getElementById('scroll-top-btn');
+        if (scrollBtn) {
+            window.addEventListener('scroll', function() {
+                const shouldShow = window.scrollY > 200;
+                scrollBtn.style.display = shouldShow ? 'block' : 'none';
+            });
+            
+            scrollBtn.onclick = function() {
+                log('Scroll to top button clicked', 'info');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            
+            log('Scroll to top functionality setup completed', 'success');
+        } else {
+            log('Scroll to top button not found', 'warn');
+        }
+    } catch (error) {
+        log(`Error setting up scroll to top: ${error.message}`, 'error');
     }
 }
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    loadPoem();
-    // Set copyright year
-    const yearSpan = document.getElementById('copyright-year');
-    if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
-    }
-    // Scroll-to-top button
-    const scrollBtn = document.getElementById('scroll-top-btn');
-    if (scrollBtn) {
-        window.addEventListener('scroll', function() {
-            scrollBtn.style.display = window.scrollY > 200 ? 'block' : 'none';
-        });
-        scrollBtn.onclick = function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
+    try {
+        log('Poem page initialization started', 'info');
+        
+        loadPoem();
+        
+        // Set copyright year
+        const yearSpan = document.getElementById('copyright-year');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+            log('Copyright year updated', 'success');
+        } else {
+            log('Copyright year element not found', 'warn');
+        }
+        
+        // Setup scroll to top
+        setupScrollToTop();
+        
+        log('Poem page initialization completed successfully', 'success');
+        
+    } catch (error) {
+        log(`Poem page initialization failed: ${error.message}`, 'error');
+        showNotification('Failed to initialize poem page', 'error');
     }
 }); 

@@ -47,9 +47,14 @@
         </section>
     </main>
 
+
+
     <footer class="footer">
-        <p>&copy; <span id="copyright-year">2024</span> . All rights reserved.</p>
+        <p>&copy; <span id="copyright-year">2025</span> . All rights reserved.</p>
     </footer>
+
+    <!-- Place theme toggle just before scripts for reliable DOM access -->
+    <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
 
     <script src="js/app.js"></script>
     <script>
@@ -59,12 +64,10 @@
             document.body.classList.add('dark');
             localStorage.setItem('theme', 'dark');
             document.getElementById('theme-icon').textContent = '☀️';
-            document.getElementById('theme-label').textContent = 'Light';
         } else {
             document.body.classList.remove('dark');
             localStorage.setItem('theme', 'light');
             document.getElementById('theme-icon').textContent = '🌙';
-            document.getElementById('theme-label').textContent = 'Dark';
         }
     }
     function initTheme() {

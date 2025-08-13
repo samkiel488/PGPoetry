@@ -54,6 +54,94 @@ body.dark-theme {
 .dark-theme .poem-meta {
     color: #b2bec3;
 }
+
+.dark-theme .admin-header {
+    background: #23272b;
+    color: #e0e0e0;
+}
+
+.dark-theme .header-content h1 {
+    color: #fff;
+}
+
+.dark-theme .nav a {
+    color: #e0e0e0;
+}
+
+.dark-theme .nav a:hover {
+    background: #34495e;
+}
+
+.dark-theme .form-group label {
+    color: #e0e0e0;
+}
+
+.dark-theme .checkbox-group label {
+    color: #e0e0e0;
+}
+
+.dark-theme .close-btn {
+    color: #e0e0e0;
+}
+
+.dark-theme .close-btn:hover {
+    color: #e74c3c;
+}
+
+/* Theme toggle styles */
+.theme-toggle {
+    position: fixed;
+    left: 2rem;
+    bottom: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #e74c3c 100%);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 1rem 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    width: 60px;
+    height: 60px;
+}
+
+.theme-toggle:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #667eea 100%);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+.dark-theme .theme-toggle {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.dark-theme .theme-toggle:hover {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+/* Theme toggle icon animations */
+.theme-toggle #theme-icon {
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover #theme-icon {
+    transform: rotate(15deg);
+}
+
 /* Reset and base styles */
 * {
     margin: 0;

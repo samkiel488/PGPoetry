@@ -22,29 +22,145 @@
     padding: 0.3rem 1.2rem;
     font-size: 1rem;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.like-btn.liked {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.like-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Copy link button styles */
+.copy-link-btn {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0.3rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-left: 1rem;
+    transition: all 0.3s ease;
+}
+
+.copy-link-btn:hover {
+    background: #217dbb;
+    transform: translateY(-1px);
+}
+
+.copy-link-btn:active {
+    transform: translateY(0);
+}
+
+/* Poem actions container */
+.poem-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Poem extra info */
+.poem-extra {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ecf0f1;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.poem-extra span {
+    background: #f8f9fa;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+}
+
+/* Dark theme adjustments for new elements */
+body.dark .like-btn {
+    background: #232b39;
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+body.dark .like-btn:hover,
+body.dark .like-btn.liked {
+    background: #e74c3c;
+    color: #fff;
+}
+
+body.dark .copy-link-btn {
+    background: #2980b9;
+    color: #fff;
+}
+
+body.dark .copy-link-btn:hover {
+    background: #1f5f8b;
+}
+
+body.dark .poem-extra {
+    border-top-color: #444;
+    color: #b2bec3;
+}
+
+body.dark .poem-extra span {
+    background: #2c3e50;
+    color: #fff;
 }
 .theme-toggle {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
+    left: 2rem;
+    bottom: 2rem;
     background: linear-gradient(135deg, #667eea 0%, #e74c3c 100%);
     color: #fff;
     border: none;
     border-radius: 50px;
-    padding: 0.7rem 2rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    padding: 1rem 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
     cursor: pointer;
-    z-index: 1000;
-    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
     outline: none;
-    border: 2px solid #fff;
+    border: 3px solid #fff;
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    width: 60px;
+    height: 60px;
 }
 .theme-toggle:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #667eea 100%);
+    transform: scale(1.1);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.22);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Theme toggle icon animations */
+.theme-toggle #theme-icon {
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover #theme-icon {
+    transform: rotate(15deg);
 }
 /* Reset and base styles */
 * {
@@ -332,6 +448,68 @@ h1, h2, h3, h4, h5, h6 {
 .search-input:focus {
     outline: none;
     border-color: #e74c3c;
+}
+
+/* Tag filters */
+.tag-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tag-filter {
+    background: #ecf0f1;
+    color: #2c3e50;
+    border: none;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tag-filter:hover {
+    background: #e74c3c;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.tag-filter.active {
+    background: #e74c3c;
+    color: #fff;
+}
+
+/* Poems section header */
+.poems-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Dark theme adjustments for search and filters */
+body.dark .search-input {
+    background: #232b39;
+    color: #f1f1f1;
+    border-color: #444;
+}
+
+body.dark .search-input:focus {
+    border-color: #e74c3c;
+}
+
+body.dark .tag-filter {
+    background: #2c3e50;
+    color: #f1f1f1;
+}
+
+body.dark .tag-filter:hover,
+body.dark .tag-filter.active {
+    background: #e74c3c;
+    color: #fff;
 }
 
 /* Loading */
