@@ -66,25 +66,39 @@
     <script>
     // Fancy Theme toggle logic
     function setTheme(dark) {
+        console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
         if (dark) {
             document.body.classList.add('dark');
             localStorage.setItem('theme', 'dark');
             document.getElementById('theme-icon').textContent = '☀️';
+            console.log('Dark theme applied');
         } else {
             document.body.classList.remove('dark');
             localStorage.setItem('theme', 'light');
             document.getElementById('theme-icon').textContent = '🌙';
+            console.log('Light theme applied');
         }
     }
     function initTheme() {
         const theme = localStorage.getItem('theme');
+        console.log(`Initializing theme: ${theme || 'light'}`);
         setTheme(theme === 'dark');
     }
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing theme toggle');
         initTheme();
-        document.getElementById('theme-toggle').onclick = function() {
-            setTheme(!document.body.classList.contains('dark'));
-        };
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.onclick = function() {
+                console.log('Theme toggle clicked');
+                const isDark = document.body.classList.contains('dark');
+                console.log(`Current theme is dark: ${isDark}`);
+                setTheme(!isDark);
+            };
+            console.log('Theme toggle event listener attached');
+        } else {
+            console.error('Theme toggle element not found');
+        }
     });
     </script>
 </body>

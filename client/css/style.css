@@ -191,6 +191,38 @@ body.dark .card {
     color: #f1f1f1;
 }
 
+body.dark .poem-card {
+    background: #232b39;
+    color: #f1f1f1;
+}
+
+body.dark .poem-article {
+    background: #232b39;
+    color: #f1f1f1;
+}
+
+body.dark .header {
+    background: #232b39;
+    color: #f1f1f1;
+}
+
+body.dark .nav-brand h1 {
+    color: #f1f1f1;
+}
+
+body.dark .nav-brand p {
+    color: #b2bec3;
+}
+
+body.dark .nav-link {
+    color: #f1f1f1;
+}
+
+body.dark .nav-link:hover,
+body.dark .nav-link.active {
+    color: #e74c3c;
+}
+
 body.dark .tag {
     background: #2c3e50;
     color: #fff;
@@ -206,13 +238,81 @@ body.dark .btn {
     background: #222e3c;
     color: #fff;
 }
+
 body.dark .btn:hover {
     background: #1a2230;
 }
 
 body.dark .theme-toggle {
-    background: #222e3c;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+body.dark .theme-toggle:hover {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+body.dark .section-title {
+    color: #f1f1f1;
+}
+
+body.dark .poem-title {
+    color: #f1f1f1;
+}
+
+body.dark .poem-excerpt {
+    color: #b2bec3;
+}
+
+body.dark .poem-meta {
+    color: #b2bec3;
+}
+
+body.dark .poem-date {
+    color: #b2bec3;
+}
+
+body.dark .poem-stats {
+    color: #b2bec3;
+}
+
+body.dark .poem-likes, 
+body.dark .poem-views {
+    background: #2c3e50;
+    color: #f1f1f1;
+}
+
+body.dark .poem-header h1 {
+    color: #f1f1f1;
+}
+
+body.dark .footer {
+    background: #1a1a1a;
+    color: #f1f1f1;
+}
+
+body.dark .hero {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: #f1f1f1;
+}
+
+body.dark .loading {
+    color: #b2bec3;
+}
+
+body.dark .poem-tags {
+    color: #b2bec3;
+}
+
+/* Ensure all text elements have proper dark theme colors */
+body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5, body.dark h6 {
+    color: #f1f1f1;
+}
+
+body.dark p {
+    color: #e0e0e0;
 }
 
 /* Typography */
@@ -380,6 +480,25 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.poem-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin-top: 0.5rem;
+}
+
+.poem-likes, .poem-views {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #f8f9fa;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
 }
 
 .poem-tags {

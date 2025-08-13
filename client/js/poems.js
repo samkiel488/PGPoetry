@@ -127,6 +127,8 @@ function createPoemCard(poem) {
         const excerpt = truncateText(poem.content);
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
         const { words, minutes } = getReadingTime(poem.content);
+        const likes = poem.likes || 0;
+        const views = poem.views || 0;
         
         const cardHTML = `
             <div class="poem-card" onclick="window.location.href='/poem/${poem.slug}'">
@@ -137,6 +139,10 @@ function createPoemCard(poem) {
                     <div class="poem-tags">${tags}</div>
                     <span class="poem-words">${words} words</span>
                     <span class="poem-reading">${minutes} min read</span>
+                </div>
+                <div class="poem-stats">
+                    <span class="poem-likes">❤️ ${likes} likes</span>
+                    <span class="poem-views">👁️ ${views} views</span>
                 </div>
                 <button class="like-btn" onclick="event.stopPropagation(); likePoem(event, '${poem._id}')">
                     <span class="like-icon">&#10084;</span> <span class="like-text">Like</span>

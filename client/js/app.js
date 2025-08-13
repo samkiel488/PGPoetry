@@ -110,6 +110,8 @@ function createPoemCard(poem) {
         
         const excerpt = truncateText(poem.content);
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
+        const likes = poem.likes || 0;
+        const views = poem.views || 0;
         
         const cardHTML = `
             <div class="poem-card" onclick="window.location.href='/poem/${poem.slug}'">
@@ -118,6 +120,10 @@ function createPoemCard(poem) {
                 <div class="poem-meta">
                     <span class="poem-date">${formatDate(poem.createdAt)}</span>
                     <div class="poem-tags">${tags}</div>
+                </div>
+                <div class="poem-stats">
+                    <span class="poem-likes">❤️ ${likes} likes</span>
+                    <span class="poem-views">👁️ ${views} views</span>
                 </div>
             </div>
         `;
