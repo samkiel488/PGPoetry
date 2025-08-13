@@ -73,6 +73,17 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Preview Poem</h3>
+                <button id="close-preview" class="close-btn">&times;</button>
+            </div>
+            <div id="preview-content" style="padding:1rem;"></div>
+        </div>
+    </div>
+
     <script src="/js/dashboard.js"></script>
     <script>
     // Theme toggle logic
@@ -93,6 +104,18 @@
     if (localStorage.getItem('theme') === 'dark') {
         setTheme(true);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const formActions = document.querySelector('.form-actions');
+        if (formActions && !document.getElementById('preview-btn')) {
+            const previewBtn = document.createElement('button');
+            previewBtn.type = 'button';
+            previewBtn.id = 'preview-btn';
+            previewBtn.className = 'btn btn-secondary';
+            previewBtn.textContent = 'Preview';
+            formActions.insertBefore(previewBtn, formActions.firstChild);
+        }
+    });
     </script>
 </body>
-</html> 
+</html>

@@ -10,8 +10,8 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isValidPassword = await bcrypt.compare(password, await bcrypt.hash(process.env.ADMIN_PASSWORD, 10));
-    
+    // Admin password in .env should be a bcrypt hash
+    const isValidPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

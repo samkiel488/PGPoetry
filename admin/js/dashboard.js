@@ -151,10 +151,27 @@ function closePoemModal() {
     poemForm.reset();
 }
 
-// Handle poem form submission
+// Preview mode for poem before submit
+const previewBtn = document.getElementById('preview-btn');
+const previewModal = document.getElementById('preview-modal');
+const previewContent = document.getElementById('preview-content');
+if (previewBtn && previewModal && previewContent) {
+    previewBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const formData = new FormData(poemForm);
+        const title = formData.get('title');
+        const content = formData.get('content');
+        const tags = formData.get('tags');
+        previewContent.innerHTML = `<h2>${title}</h2><div>${content}</div><div>${tags}</div>`;
+        previewModal.style.display = 'flex';
+    });
+    document.getElementById('close-preview').onclick = function() {
+        previewModal.style.display = 'none';
+    };
+}
+
 poemForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const formData = new FormData(poemForm);
     const poemData = {
         title: formData.get('title'),
@@ -162,20 +179,16 @@ poemForm.addEventListener('submit', async (e) => {
         tags: formData.get('tags').split(',').map(tag => tag.trim()).filter(tag => tag),
         featured: formData.get('featured') === 'on'
     };
-    
     try {
         const url = currentPoemId 
             ? `${API_BASE}/poems/${currentPoemId}`
             : `${API_BASE}/poems`;
-        
         const method = currentPoemId ? 'PUT' : 'POST';
-        
         const response = await fetch(url, {
             method,
             headers: getAuthHeaders(),
             body: JSON.stringify(poemData)
         });
-        
         if (response.ok) {
             closePoemModal();
             loadPoems();

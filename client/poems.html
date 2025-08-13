@@ -34,6 +34,13 @@
                 </div>
             </div>
             
+            <div class="tag-filters">
+                <button class="tag-filter" data-tag="love">Love</button>
+                <button class="tag-filter" data-tag="life">Life</button>
+                <button class="tag-filter" data-tag="nature">Nature</button>
+                <button class="tag-filter" data-tag="friendship">Friendship</button>
+                <!-- Add more tags as needed -->
+            </div>
             <div class="poems-grid" id="poems-container">
                 <!-- Poems will be loaded here -->
             </div>
@@ -41,6 +48,7 @@
             <div class="loading" id="loading">
                 <p>Loading poems...</p>
             </div>
+            <button id="scroll-top-btn" style="display:none;position:fixed;bottom:2rem;right:2rem;z-index:999;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;">↑</button>
         </section>
     </main>
 
@@ -72,6 +80,39 @@
             setTheme(!document.body.classList.contains('dark'));
         };
     });
+
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scroll-top-btn');
+    window.onscroll = function() {
+        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+            scrollTopBtn.style.display = 'block';
+        } else {
+            scrollTopBtn.style.display = 'none';
+        }
+    };
+    scrollTopBtn.onclick = function() {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    // Tag filter functionality
+    const tagFilters = document.querySelectorAll('.tag-filter');
+    tagFilters.forEach(button => {
+        button.addEventListener('click', () => {
+            const tag = button.getAttribute('data-tag');
+            filterPoemsByTag(tag);
+        });
+    });
+
+    function filterPoemsByTag(tag) {
+        const allPoems = document.querySelectorAll('.poem-item');
+        allPoems.forEach(poem => {
+            if (poem.classList.contains(tag)) {
+                poem.style.display = 'block';
+            } else {
+                poem.style.display = 'none';
+            }
+        });
+    }
     </script>
 </body>
-</html> 
+</html>

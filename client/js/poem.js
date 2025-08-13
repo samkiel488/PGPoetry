@@ -24,6 +24,8 @@ async function loadPoem() {
         if (!response.ok) throw new Error('Poem not found');
         const poem = await response.json();
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
+        const words = poem.content.trim().split(/\s+/).length;
+        const minutes = Math.max(1, Math.round(words / 200));
         container.innerHTML = `
             <div class="poem-header">
                 <h1>${poem.title}</h1>
@@ -36,6 +38,11 @@ async function loadPoem() {
                 </div>
             </div>
             <div class="poem-content">${poem.content}</div>
+            <div class="poem-extra">
+                <span id="poem-words">${words} words</span>
+                <span id="poem-reading">${minutes} min read</span>
+                <span id="poem-views">${poem.views || 0} views</span>
+            </div>
         `;
         // Like button logic
         setTimeout(() => {
@@ -108,5 +115,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearSpan = document.getElementById('copyright-year');
     if (yearSpan) {
         yearSpan.textContent = new Date().getFullYear();
+    }
+    // Scroll-to-top button
+    const scrollBtn = document.getElementById('scroll-top-btn');
+    if (scrollBtn) {
+        window.addEventListener('scroll', function() {
+            scrollBtn.style.display = window.scrollY > 200 ? 'block' : 'none';
+        });
+        scrollBtn.onclick = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
     }
 }); 

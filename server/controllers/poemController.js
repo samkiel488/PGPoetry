@@ -18,7 +18,11 @@ const getPoemBySlug = async (req, res) => {
     if (!/^[a-z0-9-]+$/.test(req.params.slug)) {
       return res.status(400).json({ message: 'Invalid poem slug' });
     }
-    const poem = await Poem.findOne({ slug: req.params.slug });
+    const poem = await Poem.findOneAndUpdate(
+      { slug: req.params.slug },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
@@ -96,17 +100,53 @@ const deletePoem = async (req, res) => {
 
 const likePoem = async (req, res) => {
   try {
-    const poem = await Poem.findById(req.params.id);
+    const poem = await Poem.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { likes: 1 } },
+      { new: true }
+    );
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
-    
-    poem.likes += 1;
-    await poem.save();
-    
     res.json({ likes: poem.likes });
   } catch (error) {
     res.status(500).json({ message: 'Error liking poem' });
+  }
+};
+
+// Get top liked poems (analytics)
+const getTopLikedPoems = async (req, res) => {
+  try {
+    const poems = await Poem.find().sort({ likes: -1 }).limit(10);
+    res.json(poems);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching top liked poems' });
+  }
+};
+
+// Get top viewed poems (analytics)
+const getTopViewedPoems = async (req, res) => {
+  try {
+    const poems = await Poem.find().sort({ views: -1 }).limit(10);
+    res.json(poems);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching top viewed poems' });
+  }
+};
+
+// RSS feed for all public poems
+const getRSSFeed = async (req, res) => {
+  try {
+    const poems = await Poem.find().sort({ createdAt: -1 });
+    let rss = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>PGPoetry RSS</title><link>https://pgpoetry.com/</link><description>Latest poems from PGPoetry</description>`;
+    poems.forEach(poem => {
+      rss += `<item><title>${poem.title}</title><link>https://pgpoetry.com/poem/${poem.slug}</link><description>${poem.content.substring(0, 200)}</description><pubDate>${poem.createdAt.toUTCString()}</pubDate></item>`;
+    });
+    rss += `</channel></rss>`;
+    res.set('Content-Type', 'application/rss+xml');
+    res.send(rss);
+  } catch (error) {
+    res.status(500).send('Error generating RSS feed');
   }
 };
 
@@ -116,5 +156,8 @@ module.exports = {
   createPoem,
   updatePoem,
   deletePoem,
-  likePoem
+  likePoem,
+  getTopLikedPoems,
+  getTopViewedPoems,
+  getRSSFeed
 };
