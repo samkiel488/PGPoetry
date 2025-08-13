@@ -158,24 +158,49 @@ function createPoemCard(poem) {
     }
 }
 
-// Like button handler
+// Track liked poems to prevent multiple likes
+const likedPoems = new Set();
+
+// Like button handler with rate limiting
 async function likePoem(event, poemId) {
     try {
         log(`Like button clicked for poem: ${poemId}`, 'info');
         
         const btn = event.currentTarget;
+        
+        // Check if already liked
+        if (likedPoems.has(poemId)) {
+            log(`Poem ${poemId} already liked`, 'warn');
+            showNotification('You have already liked this poem!', 'warning');
+            return;
+        }
+        
+        // Disable button and show loading state
         btn.disabled = true;
+        const originalText = btn.querySelector('.like-text').textContent;
+        btn.querySelector('.like-text').textContent = 'Liking...';
+        
+        // Add rate limiting delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/like`, { method: 'POST' });
         
+        // Mark as liked
+        likedPoems.add(poemId);
         btn.classList.add('liked');
         btn.querySelector('.like-text').textContent = 'Liked';
+        
         log(`Poem liked successfully: ${poemId}`, 'success');
         showNotification('Poem liked!', 'success');
         
     } catch (error) {
         log(`Error liking poem: ${error.message}`, 'error');
         showNotification('Could not like poem. Please try again.', 'error');
+        
+        // Reset button state on error
+        const btn = event.currentTarget;
+        btn.querySelector('.like-text').textContent = 'Like';
+        btn.classList.remove('liked');
     } finally {
         const btn = event.currentTarget;
         btn.disabled = false;
@@ -252,6 +277,9 @@ async function loadPoems() {
         filteredPoems = allPoems;
         
         log(`Loaded ${allPoems.length} poems successfully`, 'success');
+        
+        // Generate tag filters after loading poems
+        generateTagFilters();
         renderPoems();
         
     } catch (error) {
@@ -290,14 +318,66 @@ function setupSearch() {
     }
 }
 
+// Generate tag filters dynamically
+function generateTagFilters() {
+    try {
+        log('Generating tag filters dynamically', 'info');
+        
+        // Get all unique tags from poems
+        const allTags = new Set();
+        allPoems.forEach(poem => {
+            if (poem.tags && Array.isArray(poem.tags)) {
+                poem.tags.forEach(tag => allTags.add(tag));
+            }
+        });
+        
+        const uniqueTags = Array.from(allTags).sort();
+        log(`Found ${uniqueTags.length} unique tags: ${uniqueTags.join(', ')}`, 'success');
+        
+        // Get the tag filters container
+        const tagFiltersContainer = document.querySelector('.tag-filters');
+        if (!tagFiltersContainer) {
+            log('Tag filters container not found', 'error');
+            return;
+        }
+        
+        // Clear existing filters and add "All" button
+        tagFiltersContainer.innerHTML = `
+            <button class="tag-filter active" data-tag="">All Poems</button>
+        `;
+        
+        // Add dynamic tag filters
+        uniqueTags.forEach(tag => {
+            const tagButton = document.createElement('button');
+            tagButton.className = 'tag-filter';
+            tagButton.setAttribute('data-tag', tag);
+            tagButton.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+            tagFiltersContainer.appendChild(tagButton);
+        });
+        
+        log('Tag filters generated successfully', 'success');
+    } catch (error) {
+        log(`Error generating tag filters: ${error.message}`, 'error');
+    }
+}
+
 // Setup tag filters
 function setupTagFilters() {
     try {
+        // Generate filters first
+        generateTagFilters();
+        
+        // Then setup event listeners
         const tagFilters = document.querySelectorAll('.tag-filter');
         tagFilters.forEach(btn => {
             btn.addEventListener('click', function() {
-                const tag = btn.dataset.tag;
-                log(`Tag filter clicked: ${tag}`, 'info');
+                // Remove active class from all buttons
+                tagFilters.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const tag = this.dataset.tag;
+                log(`Tag filter clicked: ${tag || 'All'}`, 'info');
                 filterPoems('', tag);
             });
         });

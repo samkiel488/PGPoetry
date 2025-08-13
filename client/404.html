@@ -64,55 +64,67 @@
     <div class="notfound-msg">Sorry, the page you are looking for does not exist.</div>
     <a href="/" class="btn">Go Home</a>
     <script>
-    // Fancy Theme toggle logic
-    function setTheme(dark) {
-        console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
-        if (dark) {
-            document.body.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) themeIcon.textContent = '☀️';
-            console.log('Dark theme applied');
-        } else {
-            document.body.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            const themeIcon = document.getElementById('theme-icon');
-            if (themeIcon) themeIcon.textContent = '🌙';
-            console.log('Light theme applied');
+    // Global theme management
+    window.themeManager = {
+        setTheme: function(dark) {
+            console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
+            if (dark) {
+                document.body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.textContent = '☀️';
+                console.log('Dark theme applied');
+            } else {
+                document.body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                const themeIcon = document.getElementById('theme-icon');
+                if (themeIcon) themeIcon.textContent = '🌙';
+                console.log('Light theme applied');
+            }
+        },
+        
+        initTheme: function() {
+            const theme = localStorage.getItem('theme');
+            console.log(`Initializing theme: ${theme || 'light'}`);
+            this.setTheme(theme === 'dark');
+        },
+        
+        setupThemeToggle: function() {
+            console.log('Setting up theme toggle...');
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                // Remove any existing listeners
+                themeToggle.replaceWith(themeToggle.cloneNode(true));
+                const newThemeToggle = document.getElementById('theme-toggle');
+                
+                newThemeToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Theme toggle clicked');
+                    const isDark = document.body.classList.contains('dark');
+                    console.log(`Current theme is dark: ${isDark}`);
+                    window.themeManager.setTheme(!isDark);
+                });
+                console.log('Theme toggle event listener attached');
+            } else {
+                console.error('Theme toggle element not found');
+            }
         }
+    };
+    
+    // Initialize theme immediately
+    window.themeManager.initTheme();
+    
+    // Setup theme toggle when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up theme toggle');
+            window.themeManager.setupThemeToggle();
+        });
+    } else {
+        console.log('DOM already loaded, setting up theme toggle');
+        window.themeManager.setupThemeToggle();
     }
-    
-    function initTheme() {
-        const theme = localStorage.getItem('theme');
-        console.log(`Initializing theme: ${theme || 'light'}`);
-        setTheme(theme === 'dark');
-    }
-    
-    function setupThemeToggle() {
-        console.log('Setting up theme toggle...');
-        const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Theme toggle clicked');
-                const isDark = document.body.classList.contains('dark');
-                console.log(`Current theme is dark: ${isDark}`);
-                setTheme(!isDark);
-            });
-            console.log('Theme toggle event listener attached');
-        } else {
-            console.error('Theme toggle element not found');
-        }
-    }
-    
-    // Initialize theme immediately and after DOM loads
-    initTheme();
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, setting up theme toggle');
-        setupThemeToggle();
-    });
     </script>
 </body>
 </html>

@@ -546,35 +546,92 @@ h1, h2, h3, h4, h5, h6 {
 /* Individual poem page */
 .poem-article {
     background: white;
-    border-radius: 15px;
-    padding: 3rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    max-width: 800px;
+    border-radius: 20px;
+    padding: 4rem;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    max-width: 900px;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.poem-article::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #e74c3c 100%);
 }
 
 .poem-content {
     font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
-    line-height: 2;
+    font-size: 1.3rem;
+    line-height: 2.2;
     white-space: pre-wrap;
-    margin: 2rem 0;
+    margin: 3rem 0;
+    text-align: center;
+    color: #2c3e50;
+    position: relative;
+    padding: 2rem 0;
+}
+
+.poem-content::before {
+    content: '"';
+    position: absolute;
+    top: -1rem;
+    left: -2rem;
+    font-size: 4rem;
+    color: #e74c3c;
+    opacity: 0.3;
+    font-family: 'Playfair Display', serif;
+}
+
+.poem-content::after {
+    content: '"';
+    position: absolute;
+    bottom: -3rem;
+    right: -2rem;
+    font-size: 4rem;
+    color: #e74c3c;
+    opacity: 0.3;
+    font-family: 'Playfair Display', serif;
 }
 
 .poem-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #ecf0f1;
+    position: relative;
+}
+
+.poem-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(135deg, #667eea 0%, #e74c3c 100%);
 }
 
 .poem-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
     color: #2c3e50;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .poem-date {
     color: #95a5a6;
     font-style: italic;
+    font-size: 1.1rem;
+    margin-top: 1rem;
 }
 
 /* Search */
