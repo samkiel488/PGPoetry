@@ -114,7 +114,7 @@ function createPoemCard(poem) {
         const views = poem.views || 0;
         
         const cardHTML = `
-            <div class="poem-card" onclick="window.location.href='/poem/${poem.slug}'">
+            <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
                 <p class="poem-excerpt">${excerpt}</p>
                 <div class="poem-meta">
@@ -174,12 +174,36 @@ async function loadFeaturedPoems() {
     }
 }
 
+// Setup poem card click events
+function setupPoemCardEvents() {
+    try {
+        log('Setting up poem card events', 'info');
+        
+        // Add click event listeners to poem cards
+        document.addEventListener('click', function(e) {
+            const poemCard = e.target.closest('.poem-card');
+            if (poemCard) {
+                const slug = poemCard.getAttribute('data-poem-slug');
+                if (slug) {
+                    log(`Navigating to poem: ${slug}`, 'info');
+                    window.location.href = `/poem/${slug}`;
+                }
+            }
+        });
+        
+        log('Poem card events setup completed', 'success');
+    } catch (error) {
+        log(`Error setting up poem card events: ${error.message}`, 'error');
+    }
+}
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     try {
         log('App initialization started', 'info');
         
         loadFeaturedPoems();
+        setupPoemCardEvents();
         
         // Set copyright year
         const yearSpan = document.getElementById('copyright-year');

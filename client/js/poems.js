@@ -131,7 +131,7 @@ function createPoemCard(poem) {
         const views = poem.views || 0;
         
         const cardHTML = `
-            <div class="poem-card" onclick="window.location.href='/poem/${poem.slug}'">
+            <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
                 <p class="poem-excerpt">${excerpt}</p>
                 <div class="poem-meta">
@@ -144,7 +144,7 @@ function createPoemCard(poem) {
                     <span class="poem-likes">❤️ ${likes} likes</span>
                     <span class="poem-views">👁️ ${views} views</span>
                 </div>
-                <button class="like-btn" onclick="event.stopPropagation(); likePoem(event, '${poem._id}')">
+                <button class="like-btn" data-poem-id="${poem._id}">
                     <span class="like-icon">&#10084;</span> <span class="like-text">Like</span>
                 </button>
             </div>
@@ -331,6 +331,38 @@ function setupScrollToTop() {
     }
 }
 
+// Setup poem card and like button events
+function setupPoemCardEvents() {
+    try {
+        log('Setting up poem card and like button events', 'info');
+        
+        document.addEventListener('click', function(e) {
+            const poemCard = e.target.closest('.poem-card');
+            const likeBtn = e.target.closest('.like-btn');
+            
+            if (likeBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const poemId = likeBtn.getAttribute('data-poem-id');
+                if (poemId) {
+                    log(`Like button clicked for poem: ${poemId}`, 'info');
+                    likePoem(e, poemId);
+                }
+            } else if (poemCard) {
+                const slug = poemCard.getAttribute('data-poem-slug');
+                if (slug) {
+                    log(`Navigating to poem: ${slug}`, 'info');
+                    window.location.href = `/poem/${slug}`;
+                }
+            }
+        });
+        
+        log('Poem card and like button events setup completed', 'success');
+    } catch (error) {
+        log(`Error setting up poem card events: ${error.message}`, 'error');
+    }
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     try {
@@ -351,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupSearch();
         setupTagFilters();
         setupScrollToTop();
+        setupPoemCardEvents();
         
         log('Poems page initialization completed successfully', 'success');
         

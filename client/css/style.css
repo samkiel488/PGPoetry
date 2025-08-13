@@ -196,6 +196,10 @@ body.dark .poem-card {
     color: #f1f1f1;
 }
 
+body.dark .poem-card::before {
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+}
+
 body.dark .poem-article {
     background: #232b39;
     color: #f1f1f1;
@@ -455,11 +459,35 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.poem-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(102, 126, 234, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .poem-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.poem-card:hover::before {
+    opacity: 1;
+}
+
+.poem-card:active {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
 .poem-title {
