@@ -35,6 +35,49 @@
         </div>
     </div>
 
+    <!-- Theme toggle positioned at bottom left -->
+    <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
+
+    <script>
+        // Theme management
+        const ThemeManager = {
+            init() {
+                this.setupToggle();
+                this.loadTheme();
+            },
+            
+            setupToggle() {
+                const toggle = document.getElementById('theme-toggle');
+                if (!toggle) return;
+                
+                toggle.addEventListener('click', () => {
+                    const isDark = document.body.classList.contains('dark-theme');
+                    this.setTheme(!isDark);
+                });
+            },
+            
+            setTheme(isDark) {
+                if (isDark) {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                    document.getElementById('theme-icon').textContent = '☀️';
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                    document.getElementById('theme-icon').textContent = '🌙';
+                }
+            },
+            
+            loadTheme() {
+                const theme = localStorage.getItem('theme');
+                this.setTheme(theme === 'dark');
+            }
+        };
+
+        // Initialize theme
+        ThemeManager.init();
+    </script>
+
     <script src="/js/login.js"></script>
 </body>
-</html> 
+</html>

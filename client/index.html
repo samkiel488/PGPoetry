@@ -56,19 +56,32 @@
     <!-- Place theme toggle just before scripts for reliable DOM access -->
     <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
 
+    <script>
+    // Apply theme immediately to prevent flash - this runs before any other scripts
+    (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+        }
+    })();
+    </script>
     <script src="js/app.js"></script>
     <script>
+    
     // Global theme management
     window.themeManager = {
         setTheme: function(dark) {
             console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
             if (dark) {
+                document.documentElement.classList.add('dark');
                 document.body.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
                 const themeIcon = document.getElementById('theme-icon');
                 if (themeIcon) themeIcon.textContent = '☀️';
                 console.log('Dark theme applied');
             } else {
+                document.documentElement.classList.remove('dark');
                 document.body.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
                 const themeIcon = document.getElementById('theme-icon');
@@ -88,8 +101,8 @@
             const themeToggle = document.getElementById('theme-toggle');
             if (themeToggle) {
                 // Remove any existing listeners
-                themeToggle.replaceWith(themeToggle.cloneNode(true));
-                const newThemeToggle = document.getElementById('theme-toggle');
+                const newThemeToggle = themeToggle.cloneNode(true);
+                themeToggle.parentNode.replaceChild(newThemeToggle, themeToggle);
                 
                 newThemeToggle.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -119,6 +132,13 @@
         console.log('DOM already loaded, setting up theme toggle');
         window.themeManager.setupThemeToggle();
     }
+    
+    // Debug: Log current theme state
+    console.log('Current theme state:', {
+        localStorage: localStorage.getItem('theme'),
+        bodyClass: document.body.classList.contains('dark'),
+        htmlClass: document.documentElement.classList.contains('dark')
+    });
     </script>
 </body>
 </html>
