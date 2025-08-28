@@ -492,7 +492,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const themeIcon = document.getElementById('theme-icon');
 
         function applyTheme(theme) {
+            // set both classnames so admin (dark-theme) and client (dark) CSS both respond
             document.body.classList.toggle('dark-theme', theme === 'dark');
+            document.body.classList.toggle('dark', theme === 'dark');
+            document.documentElement.classList.toggle('dark', theme === 'dark');
             if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
         }
 

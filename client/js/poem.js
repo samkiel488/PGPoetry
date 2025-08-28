@@ -284,6 +284,35 @@ function setupScrollToTop() {
     }
 }
 
+// Theme persistence (standardized)
+const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+
+function applyTheme(theme) {
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+}
+
+initTheme();
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const current = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next);
+        applyTheme(next);
+    });
+}
+
+window.addEventListener('storage', (e) => {
+    if (e.key === 'theme') applyTheme(e.newValue || 'light');
+});
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     try {

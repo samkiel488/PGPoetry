@@ -7,6 +7,8 @@ const themeIcon = document.getElementById('theme-icon');
 
 function applyTheme(theme) {
     document.body.classList.toggle('dark-theme', theme === 'dark');
+    document.body.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
     if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
