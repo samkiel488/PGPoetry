@@ -1042,4 +1042,23 @@ body.dark .social-icon:hover {
     .poem-header h1 {
         font-size: 2rem;
     }
-} 
+}
+
+/* Screen-reader only helper */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Ensure font-awesome icons in footer inherit color and are centered */
+.social-icon-inner i {
+    font-size: 1.2rem;
+    color: inherit;
+}
