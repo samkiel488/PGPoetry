@@ -161,48 +161,52 @@ function createPoemCard(poem) {
 const likedPoems = new Set();
 
 // Like button handler with rate limiting
-async function likePoem(event, poemId) {
+async function likePoem(btn, poemId) {
     try {
         log(`Like button clicked for poem: ${poemId}`, 'info');
-        
-        const btn = event.currentTarget;
-        
+        if (!btn || !poemId) {
+            log('Like button element or poemId missing', 'error');
+            return;
+        }
+
         // Check if already liked
         if (likedPoems.has(poemId)) {
             log(`Poem ${poemId} already liked`, 'warn');
             showNotification('You have already liked this poem!', 'warning');
             return;
         }
-        
+
         // Disable button and show loading state
         btn.disabled = true;
-        const originalText = btn.querySelector('.like-text').textContent;
-        btn.querySelector('.like-text').textContent = 'Liking...';
-        
+        const likeTextEl = btn.querySelector('.like-text');
+        const originalText = likeTextEl ? likeTextEl.textContent : '';
+        if (likeTextEl) likeTextEl.textContent = 'Liking...';
+
         // Add rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/like`, { method: 'POST' });
-        
+
         // Mark as liked
         likedPoems.add(poemId);
         btn.classList.add('liked');
-        btn.querySelector('.like-text').textContent = 'Liked';
-        
+        if (likeTextEl) likeTextEl.textContent = 'Liked';
+
         log(`Poem liked successfully: ${poemId}`, 'success');
         showNotification('Poem liked!', 'success');
-        
+
     } catch (error) {
         log(`Error liking poem: ${error.message}`, 'error');
         showNotification('Could not like poem. Please try again.', 'error');
-        
+
         // Reset button state on error
-        const btn = event.currentTarget;
-        btn.querySelector('.like-text').textContent = 'Like';
-        btn.classList.remove('liked');
+        if (btn) {
+            const likeTextEl = btn.querySelector('.like-text');
+            if (likeTextEl) likeTextEl.textContent = 'Like';
+            btn.classList.remove('liked');
+        }
     } finally {
-        const btn = event.currentTarget;
-        btn.disabled = false;
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -443,7 +447,8 @@ function setupPoemCardEvents() {
                 const poemId = likeBtn.getAttribute('data-poem-id');
                 if (poemId) {
                     log(`Like button clicked for poem: ${poemId}`, 'info');
-                    likePoem(e, poemId);
+                    // Pass the actual button element to likePoem
+                    likePoem(likeBtn, poemId);
                 }
             } else if (poemCard) {
                 const slug = poemCard.getAttribute('data-poem-slug');

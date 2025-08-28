@@ -29,15 +29,24 @@ function log(message, type = 'info') {
 async function fetchWithErrorHandling(url, options = {}) {
     try {
         log(`Making ${options.method || 'GET'} request to: ${url}`, 'info');
-        
+
         const response = await fetch(url, options);
-        
+
+        // If unauthorized, clear token and redirect to login
+        if (response.status === 401) {
+            log('Received 401 Unauthorized from server', 'warn');
+            localStorage.removeItem('adminToken');
+            showNotification('Session expired. Redirecting to login...', 'warning');
+            setTimeout(() => { window.location.href = '/admin'; }, 1200);
+            throw new Error(`HTTP 401: Unauthorized`);
+        }
+
         if (!response.ok) {
             const errorText = await response.text();
             log(`HTTP ${response.status}: ${errorText}`, 'error');
             throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
-        
+
         const data = await response.json();
         log(`Request successful: ${url}`, 'success');
         return data;
@@ -112,6 +121,9 @@ function checkAuth() {
 // Get auth headers
 function getAuthHeaders() {
     const token = checkAuth();
+    if (!token) {
+        throw new Error('Not authenticated');
+    }
     return {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -186,6 +198,7 @@ function renderPoems() {
 // Attach event listeners to poem actions
 function attachPoemEventListeners() {
     try {
+        // Edit buttons
         document.querySelectorAll('.btn-edit').forEach(btn => {
             btn.onclick = (e) => {
                 e.stopPropagation();
@@ -194,7 +207,8 @@ function attachPoemEventListeners() {
                 editPoem(poemId);
             };
         });
-        
+
+        // Delete buttons
         document.querySelectorAll('.btn-danger').forEach(btn => {
             btn.onclick = (e) => {
                 e.stopPropagation();
@@ -203,8 +217,9 @@ function attachPoemEventListeners() {
                 deletePoem(poemId);
             };
         });
-        
-        document.querySelectorAll('.btn-secondary').forEach(btn => {
+
+        // Copy link buttons - only those inside .poem-actions and that have data-slug
+        document.querySelectorAll('.poem-actions .btn-secondary[data-slug]').forEach(btn => {
             btn.onclick = (e) => {
                 e.stopPropagation();
                 const slug = btn.getAttribute('data-slug');
@@ -212,7 +227,7 @@ function attachPoemEventListeners() {
                 copyPoemLink(slug);
             };
         });
-        
+
         log('Poem event listeners attached successfully', 'success');
     } catch (error) {
         log(`Error attaching poem event listeners: ${error.message}`, 'error');
@@ -222,9 +237,15 @@ function attachPoemEventListeners() {
 // Copy poem link to clipboard
 function copyPoemLink(slug) {
     try {
+        if (!slug) {
+            log('No slug provided for copyPoemLink', 'warn');
+            showNotification('No link available to copy', 'warning');
+            return;
+        }
+
         const url = `${window.location.origin}/poems/${slug}`;
         log(`Copying poem link: ${url}`, 'info');
-        
+
         navigator.clipboard.writeText(url).then(() => {
             log('Poem link copied to clipboard successfully', 'success');
             showNotification('Poem link copied to clipboard!', 'success');
@@ -325,7 +346,7 @@ function setupPreviewButton() {
 // Form submission handler
 poemForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     try {
         log('Poem form submitted', 'info');
         const formData = new FormData(poemForm);
@@ -335,30 +356,32 @@ poemForm.addEventListener('submit', async (e) => {
             tags: formData.get('tags').split(',').map(tag => tag.trim()).filter(tag => tag),
             featured: formData.get('featured') === 'on'
         };
-        
+
         log(`Poem data prepared: ${poemData.title}`, 'info');
-        
+
         const url = currentPoemId 
             ? `${API_BASE}/poems/${currentPoemId}`
             : `${API_BASE}/poems`;
         const method = currentPoemId ? 'PUT' : 'POST';
-        
+
         await fetchWithErrorHandling(url, {
             method,
             headers: getAuthHeaders(),
             body: JSON.stringify(poemData)
         });
-        
+
         closePoemModal();
         loadPoems();
-        
+
         const message = currentPoemId ? 'Poem updated successfully!' : 'Poem created successfully!';
         log(message, 'success');
         showNotification(message, 'success');
-        
+
     } catch (error) {
         log(`Error saving poem: ${error.message}`, 'error');
-        showNotification('Network error. Please try again.', 'error');
+        // Show server-provided message when available
+        const msg = error.message || 'Network error. Please try again.';
+        showNotification(msg, 'error');
     }
 });
 
@@ -369,20 +392,35 @@ async function deletePoem(poemId) {
             log('Poem deletion cancelled by user', 'info');
             return;
         }
-        
+
         log(`Deleting poem: ${poemId}`, 'info');
-        await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}`, {
+        const res = await fetch(`${API_BASE}/poems/${poemId}`, {
             method: 'DELETE',
             headers: getAuthHeaders()
         });
-        
-        loadPoems();
+
+        if (res.status === 401) {
+            // handled by getAuthHeaders or earlier, but double-check
+            localStorage.removeItem('adminToken');
+            showNotification('Session expired. Redirecting to login...', 'warning');
+            setTimeout(() => { window.location.href = '/admin'; }, 1200);
+            return;
+        }
+
+        if (!res.ok) {
+            const text = await res.text();
+            log(`Server returned error deleting poem: ${res.status} - ${text}`, 'error');
+            showNotification(`Failed to delete poem: ${res.status} - ${text}`, 'error');
+            return;
+        }
+
+        await loadPoems();
         log('Poem deleted successfully', 'success');
         showNotification('Poem deleted successfully!', 'success');
-        
+
     } catch (error) {
         log(`Error deleting poem: ${error.message}`, 'error');
-        showNotification('Error deleting poem', 'error');
+        showNotification(`Error deleting poem: ${error.message}`, 'error');
     }
 }
 
@@ -513,4 +551,4 @@ document.addEventListener('DOMContentLoaded', function() {
         log(`Dashboard initialization failed: ${error.message}`, 'error');
         showNotification('Failed to initialize dashboard', 'error');
     }
-}); 
+});
