@@ -13,7 +13,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
     <link rel="stylesheet" href="../css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+    <script>
+    (function(){
+        // Try absolute root path first, then likely local paths; fall back to CDN on error/timeout
+        function loadCSS(href, cb, errCb){
+            var l = document.createElement('link');
+            l.rel = 'stylesheet';
+            l.href = href;
+            l.onload = function(){ if(cb) cb(); };
+            l.onerror = function(){ if(errCb) errCb(); };
+            document.head.appendChild(l);
+            return l;
+        }
+        var localPaths = ['/css/all.min.css', 'css/all.min.css', '../css/all.min.css'];
+        var cdnHref = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        var loaded = false;
+        var tried = 0;
+        var timeout = setTimeout(function(){ if(!loaded){ loadCSS(cdnHref); } }, 3000);
+
+        function tryNext(){
+            if(loaded) return;
+            if(tried >= localPaths.length){
+                // nothing local worked, load CDN
+                loadCSS(cdnHref, function(){ loaded = true; clearTimeout(timeout); });
+                return;
+            }
+            var href = localPaths[tried++];
+            loadCSS(href, function(){ loaded = true; clearTimeout(timeout); }, function(){ tryNext(); });
+        }
+        tryNext();
+    })();
+    </script>
     <link rel="alternate" type="application/rss+xml" title=" RSS" href="/api/poems/rss">
 </head>
 <body>
@@ -69,10 +99,10 @@
                 <h4>Connect With Us</h4>
                 <div class="social-icons">
                     <a href="https://facebook.com/" target="_blank" rel="noopener" title="Facebook" class="social-icon">
-                        <span class="social-icon-inner"><i class="fab fa-facebook-f" aria-hidden="true"></i><span class="sr-only">Facebook</span></span>
+                        <span class="social-icon-inner"><i class="fa fa-facebook-f" aria-hidden="true"></i><span class="sr-only">Facebook</span></span>
                     </a>
                     <a href="https://tiktok.com/" target="_blank" rel="noopener" title="TikTok" class="social-icon">
-                        <span class="social-icon-inner"><i class="fab fa-tiktok" aria-hidden="true"></i><span class="sr-only">TikTok</span></span>
+                        <span class="social-icon-inner"><i class="fas fa-tiktok" aria-hidden="true"></i><span class="sr-only">TikTok</span></span>
                     </a>
                     <a href="https://instagram.com/" target="_blank" rel="noopener" title="Instagram" class="social-icon">
                         <span class="social-icon-inner"><i class="fab fa-instagram" aria-hidden="true"></i><span class="sr-only">Instagram</span></span>

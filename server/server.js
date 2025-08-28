@@ -40,6 +40,8 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files - Updated for Render deployment
 app.use(express.static(path.join(__dirname, '..', 'client')));
 app.use(express.static(path.join(__dirname, '..', 'admin')));
+// Serve root-level css folder so requests to /css/* resolve when CSS is stored at project-root/css
+app.use('/css', express.static(path.join(__dirname, '..', 'css')));
 
 // API routes
 app.use('/api/auth', authRoutes);
