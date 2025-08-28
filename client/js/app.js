@@ -1,59 +1,35 @@
 // API base URL
 const API_BASE = '/api';
 
+// Theme toggle
 const themeToggle = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
 
-// Theme toggle functionality
-function setupThemeToggle() {
-    try {
-        log('Setting up theme toggle', 'info');
-        
-        function setTheme(dark) {
-            try {
-                if (dark) {
-                    document.body.classList.add('dark-theme');
-                    localStorage.setItem('theme', 'dark');
-                    document.getElementById('theme-icon').textContent = '☀️';
-                    log('Dark theme applied', 'success');
-                } else {
-                    document.body.classList.remove('dark-theme');
-                    localStorage.setItem('theme', 'light');
-                    document.getElementById('theme-icon').textContent = '🌙';
-                    log('Light theme applied', 'success');
-                }
-            } catch (error) {
-                log(`Error setting theme: ${error.message}`, 'error');
-            }
-        }
-        
-        function initTheme() {
-            try {
-                const theme = localStorage.getItem('theme');
-                setTheme(theme === 'dark');
-                log(`Theme initialized: ${theme || 'light'}`, 'success');
-            } catch (error) {
-                log(`Error initializing theme: ${error.message}`, 'error');
-            }
-        }
-        
-        // Initialize theme
-        initTheme();
-        
-        // Add click event listener
-        if (themeToggle) {
-            themeToggle.onclick = function() {
-                log('Theme toggle clicked', 'info');
-                setTheme(!document.body.classList.contains('dark-theme'));
-            };
-            log('Theme toggle event listener attached', 'success');
-        } else {
-            log('Theme toggle element not found', 'error');
-        }
-        
-    } catch (error) {
-        log(`Error setting up theme toggle: ${error.message}`, 'error');
-    }
+function applyTheme(theme) {
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
+
+function initTheme() {
+    const saved = localStorage.getItem('theme') || 'light';
+    applyTheme(saved);
+}
+
+initTheme();
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const current = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next);
+        applyTheme(next);
+    });
+}
+
+// Sync across tabs
+window.addEventListener('storage', (e) => {
+    if (e.key === 'theme') applyTheme(e.newValue || 'light');
+});
 
 // Console logging utility
 function log(message, type = 'info') {
@@ -258,7 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         loadFeaturedPoems();
         setupPoemCardEvents();
-        setupThemeToggle();
         
         // Set copyright year
         const yearSpan = document.getElementById('copyright-year');
@@ -275,4 +250,4 @@ document.addEventListener('DOMContentLoaded', function() {
         log(`App initialization failed: ${error.message}`, 'error');
         showNotification('Failed to initialize application', 'error');
     }
-}); 
+});
