@@ -74,6 +74,7 @@
                 </div>
                 
                 <div class="form-actions">
+                    <button type="button" id="preview-btn" class="btn btn-secondary">Preview</button>
                     <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Poem</button>
                 </div>
@@ -82,13 +83,13 @@
     </div>
 
     <!-- Preview Modal -->
-    <div id="preview-modal" class="modal" style="display:none;">
+    <div id="preview-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Preview Poem</h3>
                 <button id="close-preview" class="close-btn">&times;</button>
             </div>
-            <div id="preview-content" style="padding:1rem;"></div>
+            <div id="preview-content"></div>
         </div>
     </div>
 

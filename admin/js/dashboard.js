@@ -337,16 +337,29 @@ function setupPreviewButton() {
                 const tags = formData.get('tags');
                 
                 previewContent.innerHTML = `<h2>${title}</h2><div>${content}</div><div>${tags}</div>`;
-                previewModal.style.display = 'flex';
-                log('Preview modal opened', 'success');
-            });
-            
+                previewModal.classList.add('open');
+                 log('Preview modal opened', 'success');
+             });
+             
             document.getElementById('close-preview').onclick = function() {
-                previewModal.style.display = 'none';
-                log('Preview modal closed', 'info');
-            };
-            
-            log('Preview button setup completed', 'success');
+                previewModal.classList.remove('open');
+                 log('Preview modal closed', 'info');
+             };
+            // Close when clicking outside modal-content
+            previewModal.addEventListener('click', function(e){
+                if (e.target === previewModal) {
+                    previewModal.classList.remove('open');
+                    log('Preview modal closed by outside click', 'info');
+                }
+            });
+            // Close on Esc
+            document.addEventListener('keydown', function(e){
+                if (e.key === 'Escape' && previewModal.classList.contains('open')) {
+                    previewModal.classList.remove('open');
+                }
+            });
+             
+             log('Preview button setup completed', 'success');
         }
     } catch (error) {
         log(`Error setting up preview button: ${error.message}`, 'error');

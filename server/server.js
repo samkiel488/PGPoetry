@@ -10,6 +10,9 @@ const authRoutes = require('./routes/auth');
 const poemRoutes = require('./routes/poems');
 
 const app = express();
+// If running behind a proxy or reverse-proxy (render, nginx, etc.) enable trust proxy
+// This allows express-rate-limit to use the X-Forwarded-For header safely.
+app.set('trust proxy', true);
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
