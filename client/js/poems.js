@@ -375,27 +375,30 @@ function generateTagFilters() {
     }
 }
 
-// Setup tag filters
+// Setup tag filters using event delegation so dynamically added buttons work
 function setupTagFilters() {
     try {
-        // Generate filters first
-        generateTagFilters();
-        
-        // Then setup event listeners
-        const tagFilters = document.querySelectorAll('.tag-filter');
-        tagFilters.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Remove active class from all buttons
-                tagFilters.forEach(b => b.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-                
-                const tag = this.dataset.tag;
-                log(`Tag filter clicked: ${tag || 'All'}`, 'info');
-                filterPoems('', tag);
-            });
+        const tagFiltersContainer = document.querySelector('.tag-filters');
+        if (!tagFiltersContainer) {
+            log('Tag filters container not found', 'warn');
+            return;
+        }
+
+        // Delegate clicks to buttons with class 'tag-filter'
+        tagFiltersContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('.tag-filter');
+            if (!btn) return;
+
+            // Remove active class from all buttons and set on clicked
+            tagFiltersContainer.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const tag = btn.dataset.tag || '';
+            log(`Tag filter clicked: ${tag || 'All'}`, 'info');
+            filterPoems('', tag);
         });
-        log(`Tag filters setup completed: ${tagFilters.length} filters`, 'success');
+
+        log('Tag filters setup completed (delegated listener attached)', 'success');
     } catch (error) {
         log(`Error setting up tag filters: ${error.message}`, 'error');
     }
