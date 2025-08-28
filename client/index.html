@@ -12,7 +12,26 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
-    <link rel="stylesheet" href="../css/all.min.css">
+    <script>
+    // Load local iziToast first, fallback to CDN for script if missing
+    (function(){
+        function loadScript(src, cb, errCb){
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = cb; s.onerror = errCb;
+            document.head.appendChild(s);
+        }
+        function loadCSS(href){
+            var l = document.createElement('link'); l.rel='stylesheet'; l.href=href; document.head.appendChild(l);
+        }
+
+        var iziLocal = '/node_modules/izitoast/dist/js/iziToast.min.js';
+        var iziCdn = 'https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js';
+        // try local path first (if you vendored node_modules into client) else fallback
+        loadScript(iziLocal, function(){ console.log('iziToast loaded from local'); }, function(){ loadScript(iziCdn, function(){ console.log('iziToast loaded from CDN'); }); });
+    })();
+    </script>
+    <link rel="stylesheet" href="/css/all.min.css">
     <script>
     (function(){
         // Try absolute root path first, then likely local paths; fall back to CDN on error/timeout
@@ -74,6 +93,10 @@
             <h3 class="section-title">Featured Poems 👑</h3>
             <div class="poems-grid" id="featured-poems">
                 <!-- Poems will be loaded here -->
+            </div>
+            <div class="loading" id="featured-loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Loading featured poems...</p>
             </div>
         </section>
     </main>

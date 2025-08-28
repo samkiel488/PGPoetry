@@ -145,10 +145,18 @@ function formatDate(dateString) {
     }
 }
 
+// Show admin loading spinner
+function showAdminLoading(show = true) {
+    const el = document.getElementById('admin-loading');
+    if (!el) return;
+    el.style.display = show ? 'block' : 'none';
+}
+
 // Load poems
 async function loadPoems() {
     try {
         log('Loading poems from API...', 'info');
+        showAdminLoading(true);
         const poems = await fetchWithErrorHandling(`${API_BASE}/poems`);
         window.poems = poems; // Store globally for access
         renderPoems();
@@ -157,6 +165,8 @@ async function loadPoems() {
         log(`Failed to load poems: ${error.message}`, 'error');
         poemsList.innerHTML = '<p style="color: #e74c3c;">Error loading poems</p>';
         showNotification('Failed to load poems. Please try again.', 'error');
+    } finally {
+        showAdminLoading(false);
     }
 }
 

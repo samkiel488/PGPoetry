@@ -858,10 +858,27 @@ body.dark .tag-filter.active {
 
 /* Loading */
 .loading {
+    display: none; /* hidden by default, JS will show when needed */
     text-align: center;
-    padding: 2rem;
-    color: #7f8c8d;
+    padding: 1rem 0;
 }
+
+/* If an element is marked with data-loading-visible, show immediately (used by JS when needed) */
+[data-loading-visible="true"].loading {
+    display: block !important;
+}
+
+.loading .spinner {
+    margin: 0.5rem auto;
+}
+
+/* Ensure loading blocks span grid where used */
+.loading.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Utility to hide via JS */
+.hidden { display: none !important; }
 
 /* Footer */
 .footer {

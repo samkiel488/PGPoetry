@@ -170,9 +170,13 @@ function createPoemCard(poem) {
 
 // Load featured poems
 async function loadFeaturedPoems() {
+    let featuredLoading = null;
     try {
         log('Loading featured poems...', 'info');
-        
+        // get featured spinner element (declared outside try so finally can access it)
+        featuredLoading = document.getElementById('featured-loading');
+        if (featuredLoading) featuredLoading.style.display = 'block';
+
         const poems = await fetchWithErrorHandling(`${API_BASE}/poems`);
         
         // Get featured poems (first 3)
@@ -203,6 +207,12 @@ async function loadFeaturedPoems() {
             container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poems.</p>';
         }
         showNotification('Error loading poems. Please try again later.', 'error');
+    } finally {
+        try {
+            if (featuredLoading) featuredLoading.style.display = 'none';
+        } catch (e) {
+            log(`Error hiding featured loading spinner: ${e.message}`, 'error');
+        }
     }
 }
 

@@ -274,12 +274,18 @@ function renderPoems() {
 // Spinner utilities (moved here so they are available to loadPoems and other functions)
 function showSpinner(id) {
     const el = document.getElementById(id);
-    if (el) el.style.display = '';
+    if (el) {
+        el.setAttribute('data-loading-visible', 'true');
+        el.style.display = 'block';
+    }
 }
 
 function hideSpinner(id) {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) {
+        el.removeAttribute('data-loading-visible');
+        el.style.display = 'none';
+    }
 }
 
 // Load all poems

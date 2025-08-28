@@ -29,7 +29,8 @@
     <main class="main">
         <article class="poem-article" id="poem-container">
             <div class="loading" id="loading">
-                <p>Loading poem...</p>
+                <div class="spinner"></div>
+                <p class="loading-text">Loading poem...</p>
             </div>
             <div id="share-container"></div>
             <div class="poem-extra">
@@ -82,7 +83,22 @@
             <p class="footer-tagline">Crafted with ❤️ for poetry lovers</p>
         </div>
     </footer>
-    <script src="js/app.js"></script>
-    <script src="/js/poem.js"></script>
+    <script>
+    (function(){
+        function loadScript(src, cb){
+            var s = document.createElement('script');
+            s.src = src;
+            s.onload = cb;
+            s.onerror = function(){ console.warn('Failed to load', src); cb(); };
+            document.head.appendChild(s);
+        }
+        var iziCdn = 'https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js';
+        loadScript(iziCdn, function(){
+            loadScript('/js/app.js', function(){
+                loadScript('/js/poem.js');
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
