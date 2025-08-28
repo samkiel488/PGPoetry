@@ -56,7 +56,7 @@ function showNotification(message, type = 'info', title = '') {
         pauseOnHover: true
     };
 
-    try {
+    if (typeof iziToast !== 'undefined') {
         switch(type) {
             case 'success':
                 iziToast.success(config);
@@ -70,10 +70,8 @@ function showNotification(message, type = 'info', title = '') {
             default:
                 iziToast.info(config);
         }
-    } catch (error) {
-        log(`Notification system error: ${error.message}`, 'error');
-        // Fallback to alert if iziToast is not available
-        alert(`${config.title}: ${config.message}`);
+    } else {
+        log('iziToast not loaded!', 'error');
     }
 }
 
@@ -157,26 +155,11 @@ async function loadPoem() {
         
     } catch (error) {
         log(`Error loading poem: ${error.message}`, 'error');
-        
         const container = document.getElementById('poem-container');
         if (container) {
-            container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poem.</p>';
+            container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Poem not found or error loading poem.</p>';
         }
-        
-        // Show a custom 404 page if available, else fallback
-        try {
-            const response = await fetch('/404.html');
-            if (response.ok) {
-                const html = await response.text();
-                document.body.innerHTML = html;
-                log('404 page loaded successfully', 'success');
-            } else {
-                throw new Error('404 page not found');
-            }
-        } catch (fallbackError) {
-            log(`404 fallback failed: ${fallbackError.message}`, 'error');
-            showNotification('Poem not found or has been removed.', 'error');
-        }
+        showNotification('Poem not found or has been removed.', 'error');
     } finally {
         const loading = document.getElementById('loading');
         if (loading) {
@@ -192,21 +175,31 @@ function setupPoemInteractions(poem) {
         
         // Like button logic
         const likeBtn = document.getElementById('like-btn');
+        // Track liked poems in sessionStorage
+        const likedKey = `liked_${poem._id}`;
         if (likeBtn) {
+            if (sessionStorage.getItem(likedKey)) {
+                likeBtn.classList.add('liked');
+                likeBtn.disabled = true;
+            }
             likeBtn.onclick = async function(e) {
                 e.preventDefault();
                 log('Like button clicked', 'info');
-                
+                if (sessionStorage.getItem(likedKey)) {
+                    showNotification('You have already liked this poem!', 'warning');
+                    return;
+                }
                 likeBtn.disabled = true;
                 try {
                     const data = await fetchWithErrorHandling(`${API_BASE}/poems/${poem._id}/like`, { method: 'POST' });
                     likeBtn.querySelector('.like-count').textContent = data.likes;
+                    likeBtn.classList.add('liked');
+                    sessionStorage.setItem(likedKey, 'true');
                     log(`Poem liked successfully. New count: ${data.likes}`, 'success');
                     showNotification('Poem liked!', 'success');
                 } catch (error) {
                     log(`Error liking poem: ${error.message}`, 'error');
                     showNotification('Could not like poem. Please try again.', 'error');
-                } finally {
                     likeBtn.disabled = false;
                 }
             };
@@ -316,4 +309,4 @@ document.addEventListener('DOMContentLoaded', function() {
         log(`Poem page initialization failed: ${error.message}`, 'error');
         showNotification('Failed to initialize poem page', 'error');
     }
-}); 
+});

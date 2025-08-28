@@ -1,6 +1,60 @@
 // API base URL
 const API_BASE = '/api';
 
+const themeToggle = document.getElementById('theme-toggle');
+
+// Theme toggle functionality
+function setupThemeToggle() {
+    try {
+        log('Setting up theme toggle', 'info');
+        
+        function setTheme(dark) {
+            try {
+                if (dark) {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                    document.getElementById('theme-icon').textContent = '☀️';
+                    log('Dark theme applied', 'success');
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                    document.getElementById('theme-icon').textContent = '🌙';
+                    log('Light theme applied', 'success');
+                }
+            } catch (error) {
+                log(`Error setting theme: ${error.message}`, 'error');
+            }
+        }
+        
+        function initTheme() {
+            try {
+                const theme = localStorage.getItem('theme');
+                setTheme(theme === 'dark');
+                log(`Theme initialized: ${theme || 'light'}`, 'success');
+            } catch (error) {
+                log(`Error initializing theme: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize theme
+        initTheme();
+        
+        // Add click event listener
+        if (themeToggle) {
+            themeToggle.onclick = function() {
+                log('Theme toggle clicked', 'info');
+                setTheme(!document.body.classList.contains('dark-theme'));
+            };
+            log('Theme toggle event listener attached', 'success');
+        } else {
+            log('Theme toggle element not found', 'error');
+        }
+        
+    } catch (error) {
+        log(`Error setting up theme toggle: ${error.message}`, 'error');
+    }
+}
+
 // Console logging utility
 function log(message, type = 'info') {
     const timestamp = new Date().toISOString();
@@ -156,7 +210,7 @@ async function loadFeaturedPoems() {
         }
         
         if (featuredPoems.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No featured poems available.</p>';
+            container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No featured poems available, Explore other poems.</p>';
             log('No featured poems to display', 'info');
             return;
         }
@@ -204,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         loadFeaturedPoems();
         setupPoemCardEvents();
+        setupThemeToggle();
         
         // Set copyright year
         const yearSpan = document.getElementById('copyright-year');

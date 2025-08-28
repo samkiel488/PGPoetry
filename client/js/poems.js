@@ -60,7 +60,7 @@ function showNotification(message, type = 'info', title = '') {
         pauseOnHover: true
     };
 
-    try {
+    if (typeof iziToast !== 'undefined') {
         switch(type) {
             case 'success':
                 iziToast.success(config);
@@ -74,10 +74,8 @@ function showNotification(message, type = 'info', title = '') {
             default:
                 iziToast.info(config);
         }
-    } catch (error) {
-        log(`Notification system error: ${error.message}`, 'error');
-        // Fallback to alert if iziToast is not available
-        alert(`${config.title}: ${config.message}`);
+    } else {
+        log('iziToast not loaded!', 'error');
     }
 }
 
@@ -130,6 +128,7 @@ function createPoemCard(poem) {
         const likes = poem.likes || 0;
         const views = poem.views || 0;
         
+        const isLiked = likedPoems.has(poem._id);
         const cardHTML = `
             <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
@@ -144,8 +143,8 @@ function createPoemCard(poem) {
                     <span class="poem-likes">❤️ ${likes} likes</span>
                     <span class="poem-views">👁️ ${views} views</span>
                 </div>
-                <button class="like-btn" data-poem-id="${poem._id}">
-                    <span class="like-icon">&#10084;</span> <span class="like-text">Like</span>
+                <button class="like-btn${isLiked ? ' liked' : ''}" data-poem-id="${poem._id}" ${isLiked ? 'disabled' : ''}>
+                    <span class="like-icon">&#10084;</span> <span class="like-text">${isLiked ? 'Liked' : 'Like'}</span>
                 </button>
             </div>
         `;
@@ -211,27 +210,27 @@ async function likePoem(event, poemId) {
 function filterPoems(searchTerm = '', tag = '') {
     try {
         log(`Filtering poems - search: "${searchTerm}", tag: "${tag}"`, 'info');
-        
         let poems = allPoems;
-        
-        if (searchTerm.trim()) {
+
+        if (searchTerm && searchTerm.trim()) {
             const term = searchTerm.toLowerCase();
-            poems = poems.filter(poem =>
-                poem.title.toLowerCase().includes(term) ||
-                poem.content.toLowerCase().includes(term) ||
-                poem.tags.some(t => t.toLowerCase().includes(term))
-            );
+            poems = poems.filter(poem => {
+                const titleMatch = poem.title && poem.title.toLowerCase().includes(term);
+                const contentMatch = poem.content && poem.content.toLowerCase().includes(term);
+                const tagsMatch = Array.isArray(poem.tags) && poem.tags.some(t => String(t).toLowerCase().includes(term));
+                return titleMatch || contentMatch || tagsMatch;
+            });
             log(`Filtered by search term: ${poems.length} poems found`, 'success');
         }
-        
+
         if (tag) {
-            poems = poems.filter(poem => poem.tags.includes(tag));
+            poems = poems.filter(poem => Array.isArray(poem.tags) && poem.tags.includes(tag));
             log(`Filtered by tag "${tag}": ${poems.length} poems found`, 'success');
         }
-        
+
         filteredPoems = poems;
         renderPoems();
-        
+
     } catch (error) {
         log(`Error filtering poems: ${error.message}`, 'error');
     }
@@ -268,35 +267,50 @@ function renderPoems() {
     }
 }
 
+// Spinner utilities (moved here so they are available to loadPoems and other functions)
+function showSpinner(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+}
+
+function hideSpinner(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+}
+
 // Load all poems
 async function loadPoems() {
     try {
         log('Loading all poems...', 'info');
-        
-        allPoems = await fetchWithErrorHandling(`${API_BASE}/poems`);
+        showSpinner('loading');
+        const response = await fetchWithErrorHandling(`${API_BASE}/poems`);
+        log('API response:', 'info');
+        console.log('API response raw:', response);
+        if (Array.isArray(response) && response.length > 0) {
+            console.log('First poem object:', response[0]);
+        }
+        // Only accept array response from API
+        if (Array.isArray(response)) {
+            allPoems = response;
+        } else {
+            allPoems = [];
+            log('API response format not recognized', 'error');
+            showNotification('Error: Unexpected API response format.', 'error');
+        }
         filteredPoems = allPoems;
-        
         log(`Loaded ${allPoems.length} poems successfully`, 'success');
-        
         // Generate tag filters after loading poems
         generateTagFilters();
         renderPoems();
-        
     } catch (error) {
         log(`Error loading poems: ${error.message}`, 'error');
-        
         const container = document.getElementById('poems-container');
-        const loading = document.getElementById('loading');
-        
-        if (loading) {
-            loading.style.display = 'none';
-        }
-        
         if (container) {
             container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poems.</p>';
         }
-        
         showNotification('Error loading poems. Please try again later.', 'error');
+    } finally {
+        hideSpinner('loading');
     }
 }
 
@@ -464,11 +478,27 @@ document.addEventListener('DOMContentLoaded', function() {
         setupTagFilters();
         setupScrollToTop();
         setupPoemCardEvents();
+
+        // Theme persistence
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        function applyTheme() {
+            document.body.classList.toggle('dark-theme', darkMode);
+            themeIcon.textContent = darkMode ? '☀️' : '🌙';
+        }
+        applyTheme();
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                darkMode = !darkMode;
+                localStorage.setItem('darkMode', darkMode);
+                applyTheme();
+            });
+        }
         
         log('Poems page initialization completed successfully', 'success');
         
     } catch (error) {
         log(`Poems page initialization failed: ${error.message}`, 'error');
-        showNotification('Failed to initialize poems page', 'error');
     }
 });

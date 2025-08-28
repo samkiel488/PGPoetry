@@ -4,23 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PG'sPoeticPen  - Every verse, a priceless gift.</title>
-    <meta name="description" content="Read and share beautiful poems on . Discover poems by tag, author, and popularity.">
-    <meta property="og:title" content=" - Every verse, a priceless gift.">
-    <meta property="og:description" content="Read and share beautiful poems on . Discover poems by tag, author, and popularity.">
-    <meta property="og:image" content="/img/og-image.png">
+    <meta name="description" content="Read and share beautiful poems on PG'sPoeticPen. Discover poems by tag, genre, and popularity.">
+    <meta property="og:title" content="PG'sPoeticPen - Every verse, a priceless gift.">
+    <meta property="og:description" content="Read and share beautiful poems on PG'sPoeticPen. Discover poems by tag, genre, and popularity.">
+    <meta property="og:image" content="/images/Mankillshimself.jpg">
+    <link rel="icon" href="../images/Mankillshimself.jpg" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+    <link rel="stylesheet" href="../css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
     <link rel="alternate" type="application/rss+xml" title=" RSS" href="/api/poems/rss">
 </head>
 <body>
-    <!-- Theme toggle moved to bottom -->
     <header class="header">
         <nav class="nav">
             <div class="nav-brand">
                 <h1>PG'sPoeticPen</h1>
-                <p>Every verse, a priceless gift.</p>
+                <p>Every verse, a priceless gift.</p>
             </div>
             <ul class="nav-menu">
                 <li><a href="/" class="nav-link active">Home</a></li>
@@ -40,7 +41,7 @@
         </section>
 
         <section class="featured-poems">
-            <h3 class="section-title">Featured Poems</h3>
+            <h3 class="section-title">Featured Poems 👑</h3>
             <div class="poems-grid" id="featured-poems">
                 <!-- Poems will be loaded here -->
             </div>
@@ -50,11 +51,52 @@
 
 
     <footer class="footer">
-        <p>&copy; <span id="copyright-year">2025</span> . All rights reserved.</p>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>PG'sPoeticPen</h3>
+                <p>Every verse, a priceless gift.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="/">Home</a>
+                <a href="/poems">Poems</a>
+                <a href="/admin">Admin</a>
+                <a href="https://www.samkiel-dev.vercel.app" target="_blank">Developer</a>
+            </div>
+            
+            <div class="footer-social">
+                <h4>Connect With Us</h4>
+                <div class="social-icons">
+                    <a href="https://facebook.com/" target="_blank" rel="noopener" title="Facebook" class="social-icon">
+                        <span class="social-icon-inner">
+                            <i class="fa fa-facebook"></i>
+                        </span>
+                    </a>
+                    <a href="https://tiktok.com/" target="_blank" rel="noopener" title="TikTok" class="social-icon">
+                        <span class="social-icon-inner">🎵</span>
+                    </a>
+                    <a href="https://instagram.com/" target="_blank" rel="noopener" title="Instagram" class="social-icon">
+                        <span class="social-icon-inner">📷</span>
+                    </a>
+                    <a href="https://x.com/" target="_blank" rel="noopener" title="X" class="social-icon">
+                        <span class="social-icon-inner">🐦</span>
+                    </a>
+                    <a href="https://youtube.com/" target="_blank" rel="noopener" title="YouTube" class="social-icon">
+                        <span class="social-icon-inner">📺</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="copyright-year">2025</span> PG'sPoeticPen. All rights reserved.</p>
+            <p class="footer-tagline">Website Designed and Developed by <a href="https://www.samkiel-dev.vercel.app" target="_blank">SAMKIEL</a> </p>
+        </div>
     </footer>
 
     <!-- Place theme toggle just before scripts for reliable DOM access -->
-    <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
+    <button class="theme-toggle bottom-left" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
 
     <script>
     // Apply theme immediately to prevent flash - this runs before any other scripts
@@ -67,78 +109,5 @@
     })();
     </script>
     <script src="js/app.js"></script>
-    <script>
-    
-    // Global theme management
-    window.themeManager = {
-        setTheme: function(dark) {
-            console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
-            if (dark) {
-                document.documentElement.classList.add('dark');
-                document.body.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                const themeIcon = document.getElementById('theme-icon');
-                if (themeIcon) themeIcon.textContent = '☀️';
-                console.log('Dark theme applied');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.body.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                const themeIcon = document.getElementById('theme-icon');
-                if (themeIcon) themeIcon.textContent = '🌙';
-                console.log('Light theme applied');
-            }
-        },
-        
-        initTheme: function() {
-            const theme = localStorage.getItem('theme');
-            console.log(`Initializing theme: ${theme || 'light'}`);
-            this.setTheme(theme === 'dark');
-        },
-        
-        setupThemeToggle: function() {
-            console.log('Setting up theme toggle...');
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                // Remove any existing listeners
-                const newThemeToggle = themeToggle.cloneNode(true);
-                themeToggle.parentNode.replaceChild(newThemeToggle, themeToggle);
-                
-                newThemeToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Theme toggle clicked');
-                    const isDark = document.body.classList.contains('dark');
-                    console.log(`Current theme is dark: ${isDark}`);
-                    window.themeManager.setTheme(!isDark);
-                });
-                console.log('Theme toggle event listener attached');
-            } else {
-                console.error('Theme toggle element not found');
-            }
-        }
-    };
-    
-    // Initialize theme immediately
-    window.themeManager.initTheme();
-    
-    // Setup theme toggle when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up theme toggle');
-            window.themeManager.setupThemeToggle();
-        });
-    } else {
-        console.log('DOM already loaded, setting up theme toggle');
-        window.themeManager.setupThemeToggle();
-    }
-    
-    // Debug: Log current theme state
-    console.log('Current theme state:', {
-        localStorage: localStorage.getItem('theme'),
-        bodyClass: document.body.classList.contains('dark'),
-        htmlClass: document.documentElement.classList.contains('dark')
-    });
-    </script>
 </body>
 </html>

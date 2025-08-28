@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 </head>
 <body>
-    <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
+    <button class="theme-toggle bottom-left" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
     <header class="header">
         <nav class="nav">
             <div class="nav-brand">
@@ -37,76 +37,51 @@
                 <span id="poem-views"></span>
             </div>
         </article>
-        <button id="scroll-top-btn" style="display:none;position:fixed;bottom:2rem;right:2rem;z-index:999;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.2);cursor:pointer;">↑</button>
+        <button id="scroll-top-btn">↑</button>
     </main>
 
     <footer class="footer">
-        <p>&copy; <span id="copyright-year">2024</span> PG'sPoeticPen. All rights reserved.</p>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>PG'sPoeticPen</h3>
+                <p>Every verse, a priceless gift.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="/">Home</a>
+                <a href="/poems">Poems</a>
+                <a href="/admin">Admin</a>
+            </div>
+            
+            <div class="footer-social">
+                <h4>Connect With Us</h4>
+                <div class="social-icons">
+                    <a href="https://facebook.com/" target="_blank" rel="noopener" title="Facebook" class="social-icon">
+                        <span class="social-icon-inner">📘</span>
+                    </a>
+                    <a href="https://tiktok.com/" target="_blank" rel="noopener" title="TikTok" class="social-icon">
+                        <span class="social-icon-inner">🎵</span>
+                    </a>
+                    <a href="https://instagram.com/" target="_blank" rel="noopener" title="Instagram" class="social-icon">
+                        <span class="social-icon-inner">📷</span>
+                    </a>
+                    <a href="https://x.com/" target="_blank" rel="noopener" title="X" class="social-icon">
+                        <span class="social-icon-inner">🐦</span>
+                    </a>
+                    <a href="https://youtube.com/" target="_blank" rel="noopener" title="YouTube" class="social-icon">
+                        <span class="social-icon-inner">📺</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; <span id="copyright-year">2024</span> PG'sPoeticPen. All rights reserved.</p>
+            <p class="footer-tagline">Crafted with ❤️ for poetry lovers</p>
+        </div>
     </footer>
-
+    <script src="js/app.js"></script>
     <script src="/js/poem.js"></script>
-    <script>
-    // Global theme management
-    window.themeManager = {
-        setTheme: function(dark) {
-            console.log(`Setting theme: ${dark ? 'dark' : 'light'}`);
-            if (dark) {
-                document.body.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                const themeIcon = document.getElementById('theme-icon');
-                if (themeIcon) themeIcon.textContent = '☀️';
-                console.log('Dark theme applied');
-            } else {
-                document.body.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                const themeIcon = document.getElementById('theme-icon');
-                if (themeIcon) themeIcon.textContent = '🌙';
-                console.log('Light theme applied');
-            }
-        },
-        
-        initTheme: function() {
-            const theme = localStorage.getItem('theme');
-            console.log(`Initializing theme: ${theme || 'light'}`);
-            this.setTheme(theme === 'dark');
-        },
-        
-        setupThemeToggle: function() {
-            console.log('Setting up theme toggle...');
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                // Remove any existing listeners
-                themeToggle.replaceWith(themeToggle.cloneNode(true));
-                const newThemeToggle = document.getElementById('theme-toggle');
-                
-                newThemeToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Theme toggle clicked');
-                    const isDark = document.body.classList.contains('dark');
-                    console.log(`Current theme is dark: ${isDark}`);
-                    window.themeManager.setTheme(!isDark);
-                });
-                console.log('Theme toggle event listener attached');
-            } else {
-                console.error('Theme toggle element not found');
-            }
-        }
-    };
-    
-    // Initialize theme immediately
-    window.themeManager.initTheme();
-    
-    // Setup theme toggle when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up theme toggle');
-            window.themeManager.setupThemeToggle();
-        });
-    } else {
-        console.log('DOM already loaded, setting up theme toggle');
-        window.themeManager.setupThemeToggle();
-    }
-    </script>
 </body>
 </html> 
