@@ -20,7 +20,7 @@
         seq = ['/js/app.js'];
     } else if (path === '/poems') {
         // Poems listing
-        seq = ['/js/poems.js'];
+        seq = ['/js/app.js', '/js/poems.js'];
     } else if (path.startsWith('/poem/') || (path.startsWith('/poems/') && path.split('/').filter(Boolean).length > 1)) {
         // Single poem page (support /poem/:slug and /poems/:slug)
         seq = ['/js/app.js', '/js/poem.js'];

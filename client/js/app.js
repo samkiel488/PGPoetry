@@ -244,7 +244,14 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         log('App initialization started', 'info');
         
-        loadFeaturedPoems();
+        // Only load featured poems if the container exists on this page
+        const featuredContainer = document.getElementById('featured-poems');
+        if (featuredContainer) {
+            loadFeaturedPoems();
+        } else {
+            log('No featured poems container found on this page; skipping featured load', 'info');
+        }
+        
         setupPoemCardEvents();
         
         // Set copyright year

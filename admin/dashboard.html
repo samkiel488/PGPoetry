@@ -15,6 +15,7 @@
             <h1>Welcome Admin</h1>
             <nav>
                 <a href="/" class="btn btn-secondary">Go to Public Site</a>
+                <a href="/admin/analytics.html" class="btn btn-primary">Analytics</a>
                 <button id="logout-btn" class="btn btn-secondary">Logout</button>
             </nav>
         </div>
@@ -93,6 +94,22 @@
         </div>
     </div>
 
+    <!-- Analytics panel -->
+    <section class="analytics-panel" id="analytics-container">
+        <h2>Analytics</h2>
+        <div id="top-liked" class="analytics-list">
+            <!-- Top liked poems will render here -->
+        </div>
+        <div id="top-viewed" class="analytics-list">
+            <!-- Top viewed poems will render here -->
+        </div>
+    </section>
+
+    <div class="footer-bottom">
+        <p>&copy; <span id="copyright-year">2025</span> PG'sPoeticPen. All rights reserved.</p>
+        <p class="footer-tagline">Website Designed and Developed by <a href="https://www.samkiel-dev.vercel.app" target="_blank">SAMKIEL</a> </p>
+    </div>
     <script src="/js/dashboard.js"></script>
+    <script src="/js/analytics.js"></script>
 </body>
 </html>

@@ -10,9 +10,18 @@ const authRoutes = require('./routes/auth');
 const poemRoutes = require('./routes/poems');
 
 const app = express();
-// If running behind a proxy or reverse-proxy (render, nginx, etc.) enable trust proxy
-// This allows express-rate-limit to use the X-Forwarded-For header safely.
-app.set('trust proxy', true);
+// Configure trust proxy in a safe, configurable way.
+// Do NOT set this to the boolean `true` in production unless you understand the implications.
+// Set environment variable TRUST_PROXY to a specific value when needed (e.g. 'loopback', '127.0.0.1', 'uniquelocal', or a number of hops like '1').
+const trustProxyEnv = process.env.TRUST_PROXY;
+if (typeof trustProxyEnv !== 'undefined' && trustProxyEnv !== '') {
+  // Use the explicit value provided by the environment
+  app.set('trust proxy', trustProxyEnv);
+  console.log(`Express trust proxy set from TRUST_PROXY=${trustProxyEnv}`);
+} else {
+  // Default to loopback (safer than `true`) for local development
+  app.set('trust proxy', 'loopback');
+}
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
@@ -87,6 +96,14 @@ app.get('/admin', (req, res) => {
 
 app.get('/admin/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin', 'dashboard.html'));
+});
+
+// Serve admin analytics page (explicit routes so /admin/analytics.html works)
+app.get('/admin/analytics', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin', 'analytics.html'));
+});
+app.get('/admin/analytics.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin', 'analytics.html'));
 });
 
 // Connect to MongoDB and start server

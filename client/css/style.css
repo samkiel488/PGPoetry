@@ -1028,7 +1028,6 @@ body.dark .social-icon:hover {
     }
 }
 
-
 /* Responsive design */
 @media (max-width: 768px) {
     .nav {
@@ -1061,21 +1060,123 @@ body.dark .social-icon:hover {
     }
 }
 
-/* Screen-reader only helper */
-.sr-only {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
+/* Responsive adjustments (concise) */
+/* Base grid for poems */
+.poems-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    align-items: start;
 }
 
-/* Ensure font-awesome icons in footer inherit color and are centered */
-.social-icon-inner i {
-    font-size: 1.2rem;
-    color: inherit;
+.poem-card {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    width: 100%;
+}
+.poem-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+
+.poems-section { padding: 2rem; }
+.search-input { width: 100%; box-sizing: border-box; }
+.tag-filters { display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.75rem 0; }
+
+.footer .footer-content { display: flex; gap: 2rem; justify-content: space-between; align-items: flex-start; max-width: 1200px; margin: 0 auto; padding: 2rem; }
+.footer .footer-social .social-icons { display:flex; gap:0.5rem; flex-wrap:wrap; }
+
+/* Make header/nav responsive without adding JS (simple stacking) */
+.nav { padding: 1rem; }
+.nav-menu { gap: 1rem; display:flex; flex-wrap:wrap; }
+.nav-brand { flex: 1 1 auto; }
+
+/* Smaller screens */
+@media (max-width: 900px) {
+    .poems-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav { padding: 0.75rem 1rem; }
+    .nav-brand h1 { font-size: 1.4rem; }
+    .nav-brand p { display:none; }
+    .footer .footer-content { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 600px) {
+    .poems-grid { grid-template-columns: 1fr; }
+    .poems-section { padding: 1rem; }
+    .nav { padding: 0.5rem 0.75rem; }
+    .nav-menu { width: 100%; justify-content: flex-start; gap: 0.75rem; }
+    .nav-link { font-size: 0.95rem; }
+    .theme-toggle { width: 44px; height: 44px; bottom: 0.75rem; left: 0.75rem; }
+    .poem-card { padding: 0.9rem; }
+    .poem-title { font-size: 1.05rem; }
+    .poem-excerpt { font-size: 0.95rem; }
+    #scroll-top-btn { right: 1rem; bottom: 5.5rem; }
+    .footer .footer-content { padding: 1rem; }
+}
+
+/* Tiny devices */
+@media (max-width: 400px) {
+    .nav-brand h1 { font-size: 1.2rem; }
+    .nav-menu { gap: 0.5rem; }
+    .poem-excerpt { font-size: 0.9rem; }
+    .poem-meta { font-size: 0.85rem; }
+}
+
+/* Accessibility: ensure interactive elements are large enough on touch */
+button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding: 0.4rem 0.9rem; }
+
+/* Ensure loading spinner center on small screens */
+.loading { display: none; }
+.loading[style], .loading[aria-hidden="false"] { display: block; }
+
+/* Responsive helper utilities */
+.hide-on-mobile { display: none !important; }
+
+.see-more {
+  display: inline-block;
+  margin: 0.5rem 0 1rem 0;
+  background: transparent;
+  border: 0;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.collapsed { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .footer .footer-links { display: none; }
+  .footer .footer-brand p { display: none; }
+  .poem-meta { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+  .poems-grid { grid-template-columns: 1fr; }
+  .poem-card { padding: 0.8rem; }
+  .poem-title { font-size: 1rem; }
+  .poem-excerpt { font-size: 0.95rem; }
+  .analytics-controls { justify-content: space-between; }
+}
+
+/* Small-device header centering and mobile nav adjustments */
+@media (max-width: 768px) {
+    .nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.75rem 1rem;
+    }
+    .nav-brand {
+        text-align: center;
+        margin-bottom: 0;
+    }
+    /* Ensure tagline is visible on very small screens */
+    .nav-brand p { display: block; font-size: 0.9rem; color: #7f8c8d; margin: 0; }
+    .nav-menu {
+        width: 100%;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 0.25rem;
+    }
+    .nav-menu li { list-style: none; }
+    .nav-menu .nav-link { padding: 0.35rem 0.6rem; }
 }

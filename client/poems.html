@@ -90,24 +90,7 @@
             <p class="footer-tagline">Website Designed and Developed by <a href="https://www.samkiel-dev.vercel.app" target="_blank">SAMKIEL</a> </p>
         </div>
     </footer>
-    <!-- Load iziToast reliably then app scripts -->
-    <script>
-    (function(){
-        function loadScript(src, cb){
-            var s = document.createElement('script');
-            s.src = src;
-            s.onload = cb;
-            s.onerror = function(){ console.warn('Failed to load', src); cb(); };
-            document.head.appendChild(s);
-        }
-        var iziCdn = 'https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js';
-        loadScript(iziCdn, function(){
-            // iziToast loaded (or failed); now load page scripts
-            loadScript('/js/flash-theme.js', function(){
-                loadScript('/js/poems.js');
-            });
-        });
-    })();
-    </script>
+    <script src="/js/poems.js"></script>
+    <script src="/js/responsive.js"></script>
 </body>
 </html>

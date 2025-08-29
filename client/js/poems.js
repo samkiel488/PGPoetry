@@ -133,6 +133,7 @@ function createPoemCard(poem) {
             <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
                 <p class="poem-excerpt">${excerpt}</p>
+                <div class="poem-full-content" aria-hidden="true" style="display:none;">${poem.content}</div>
                 <div class="poem-meta">
                     <span class="poem-date">${formatDate(poem.createdAt)}</span>
                     <div class="poem-tags">${tags}</div>
@@ -143,6 +144,7 @@ function createPoemCard(poem) {
                     <span class="poem-likes">❤️ ${likes} likes</span>
                     <span class="poem-views">👁️ ${views} views</span>
                 </div>
+                <button class="see-more btn" aria-expanded="false">See more</button>
                 <button class="like-btn${isLiked ? ' liked' : ''}" data-poem-id="${poem._id}" ${isLiked ? 'disabled' : ''}>
                     <span class="like-icon">&#10084;</span> <span class="like-text">${isLiked ? 'Liked' : 'Like'}</span>
                 </button>
@@ -370,14 +372,55 @@ function generateTagFilters() {
             <button class="tag-filter active" data-tag="">All Poems</button>
         `;
         
-        // Add dynamic tag filters
-        uniqueTags.forEach(tag => {
-            const tagButton = document.createElement('button');
-            tagButton.className = 'tag-filter';
-            tagButton.setAttribute('data-tag', tag);
-            tagButton.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
-            tagFiltersContainer.appendChild(tagButton);
-        });
+        // Responsive behavior: show only a few tags on small screens and provide a "More" toggle
+        const MAX_VISIBLE_MOBILE = 5;
+        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+        if (isMobile && uniqueTags.length > MAX_VISIBLE_MOBILE) {
+            // show first N tags and hide the rest behind a toggle
+            uniqueTags.forEach((tag, idx) => {
+                if (idx < MAX_VISIBLE_MOBILE) {
+                    const tagButton = document.createElement('button');
+                    tagButton.className = 'tag-filter';
+                    tagButton.setAttribute('data-tag', tag);
+                    tagButton.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+                    tagFiltersContainer.appendChild(tagButton);
+                }
+            });
+
+            // create hidden container for the remaining tags
+            const hiddenWrapper = document.createElement('span');
+            hiddenWrapper.className = 'tag-more-list';
+            hiddenWrapper.style.display = 'none';
+
+            uniqueTags.forEach((tag, idx) => {
+                if (idx >= MAX_VISIBLE_MOBILE) {
+                    const tagButton = document.createElement('button');
+                    tagButton.className = 'tag-filter tag-filter-hidden';
+                    tagButton.setAttribute('data-tag', tag);
+                    tagButton.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+                    hiddenWrapper.appendChild(tagButton);
+                }
+            });
+
+            const moreBtn = document.createElement('button');
+            moreBtn.className = 'tag-filter tag-filter-more';
+            moreBtn.type = 'button';
+            moreBtn.textContent = 'More ▾';
+            moreBtn.setAttribute('aria-expanded', 'false');
+
+            tagFiltersContainer.appendChild(hiddenWrapper);
+            tagFiltersContainer.appendChild(moreBtn);
+        } else {
+            // Desktop or few tags: render them all
+            uniqueTags.forEach(tag => {
+                const tagButton = document.createElement('button');
+                tagButton.className = 'tag-filter';
+                tagButton.setAttribute('data-tag', tag);
+                tagButton.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+                tagFiltersContainer.appendChild(tagButton);
+            });
+        }
         
         log('Tag filters generated successfully', 'success');
     } catch (error) {
@@ -396,19 +439,37 @@ function setupTagFilters() {
 
         // Delegate clicks to buttons with class 'tag-filter'
         tagFiltersContainer.addEventListener('click', function(e) {
-            const btn = e.target.closest('.tag-filter');
+            const btn = e.target.closest('button.tag-filter');
             if (!btn) return;
 
-            // Remove active class from all buttons and set on clicked
+            // Handle the "More" toggle separately
+            if (btn.classList.contains('tag-filter-more')) {
+                e.preventDefault();
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                const hiddenList = tagFiltersContainer.querySelector('.tag-more-list');
+                if (hiddenList) {
+                    if (expanded) {
+                        hiddenList.style.display = 'none';
+                        btn.textContent = 'More ▾';
+                        btn.setAttribute('aria-expanded', 'false');
+                    } else {
+                        hiddenList.style.display = 'inline-block';
+                        btn.textContent = 'Less ▴';
+                        btn.setAttribute('aria-expanded', 'true');
+                    }
+                }
+                return;
+            }
+
+            // Normal tag filter click
+            const tag = btn.getAttribute('data-tag');
+            // update active class
             tagFiltersContainer.querySelectorAll('.tag-filter').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-
-            const tag = btn.dataset.tag || '';
-            log(`Tag filter clicked: ${tag || 'All'}`, 'info');
             filterPoems('', tag);
         });
 
-        log('Tag filters setup completed (delegated listener attached)', 'success');
+        log('Tag filters setup completed', 'success');
     } catch (error) {
         log(`Error setting up tag filters: ${error.message}`, 'error');
     }
@@ -446,6 +507,7 @@ function setupPoemCardEvents() {
         document.addEventListener('click', function(e) {
             const poemCard = e.target.closest('.poem-card');
             const likeBtn = e.target.closest('.like-btn');
+            const seeMoreBtn = e.target.closest('.see-more');
             
             if (likeBtn) {
                 e.preventDefault();
@@ -455,6 +517,27 @@ function setupPoemCardEvents() {
                     log(`Like button clicked for poem: ${poemId}`, 'info');
                     // Pass the actual button element to likePoem
                     likePoem(likeBtn, poemId);
+                }
+            } else if (seeMoreBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const card = seeMoreBtn.closest('.poem-card');
+                if (!card) return;
+                const full = card.querySelector('.poem-full-content');
+                const excerpt = card.querySelector('.poem-excerpt');
+                const expanded = seeMoreBtn.getAttribute('aria-expanded') === 'true';
+                if (expanded) {
+                    // collapse
+                    if (full) full.style.display = 'none';
+                    if (excerpt) excerpt.style.display = 'block';
+                    seeMoreBtn.textContent = 'See more';
+                    seeMoreBtn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // expand
+                    if (full) full.style.display = 'block';
+                    if (excerpt) excerpt.style.display = 'none';
+                    seeMoreBtn.textContent = 'Show less';
+                    seeMoreBtn.setAttribute('aria-expanded', 'true');
                 }
             } else if (poemCard) {
                 const slug = poemCard.getAttribute('data-poem-slug');

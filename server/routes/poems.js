@@ -16,8 +16,13 @@ const {
 } = require('../controllers/poemController');
 
 // Public routes
+const countViews = require('../middleware/countViews');
 router.get('/', getAllPoems);
-router.get('/:slug', getPoemBySlug);
+// When fetching a poem by slug, increment views via countViews middleware and then return the poem
+router.get('/:slug', countViews, async (req, res, next) => {
+  if (req.poem) return res.json(req.poem);
+  return getPoemBySlug(req, res, next);
+});
 
 // Protected routes (admin only, with validation)
 router.post('/',
