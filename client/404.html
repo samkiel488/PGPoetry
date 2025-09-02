@@ -12,17 +12,8 @@
     <h1 class="notfound-title">404</h1>
     <div class="notfound-msg">Sorry, the page you are looking for does not exist.</div>
     <a href="/" class="btn">Go Home</a>
-    <script>
-    // Apply theme immediately to prevent flash - this runs before any other scripts
-    (function() {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
-        }
-    })();
-    </script>
-    <script src="js/app.js"></script>
-    <script src="/js/404.js"></script>
+    <script src="/js/init-theme-inline.js"></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/404.js" defer></script>
 </body>
 </html>

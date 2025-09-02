@@ -7,62 +7,15 @@
     <meta name="description" content="Read and share beautiful poems on PG'sPoeticPen. Discover poems by tag, genre, and popularity.">
     <meta property="og:title" content="PG'sPoeticPen - Every verse, a priceless gift.">
     <meta property="og:description" content="Read and share beautiful poems on PG'sPoeticPen. Discover poems by tag, genre, and popularity.">
-    <meta property="og:image" content="/images/Mankillshimself.jpg">
+    <meta property="og:image" content="../images/Mankillshimself.jpg">
     <link rel="icon" href="../images/Mankillshimself.jpg" type="image/x-icon">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
-    <script>
-    // Load local iziToast first, fallback to CDN for script if missing
-    (function(){
-        function loadScript(src, cb, errCb){
-            var s = document.createElement('script');
-            s.src = src;
-            s.onload = cb; s.onerror = errCb;
-            document.head.appendChild(s);
-        }
-        function loadCSS(href){
-            var l = document.createElement('link'); l.rel='stylesheet'; l.href=href; document.head.appendChild(l);
-        }
-
-        var iziLocal = '/node_modules/izitoast/dist/js/iziToast.min.js';
-        var iziCdn = 'https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js';
-        // try local path first (if you vendored node_modules into client) else fallback
-        loadScript(iziLocal, function(){ console.log('iziToast loaded from local'); }, function(){ loadScript(iziCdn, function(){ console.log('iziToast loaded from CDN'); }); });
-    })();
-    </script>
+    <script src="/js/load-izitoast.js" defer></script>
+    <script src="/js/load-css-fallback.js" defer></script>
     <link rel="stylesheet" href="/css/all.min.css">
-    <script>
-    (function(){
-        // Try absolute root path first, then likely local paths; fall back to CDN on error/timeout
-        function loadCSS(href, cb, errCb){
-            var l = document.createElement('link');
-            l.rel = 'stylesheet';
-            l.href = href;
-            l.onload = function(){ if(cb) cb(); };
-            l.onerror = function(){ if(errCb) errCb(); };
-            document.head.appendChild(l);
-            return l;
-        }
-        var localPaths = ['/css/all.min.css', 'css/all.min.css', '../css/all.min.css'];
-        var cdnHref = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
-        var loaded = false;
-        var tried = 0;
-        var timeout = setTimeout(function(){ if(!loaded){ loadCSS(cdnHref); } }, 3000);
-
-        function tryNext(){
-            if(loaded) return;
-            if(tried >= localPaths.length){
-                // nothing local worked, load CDN
-                loadCSS(cdnHref, function(){ loaded = true; clearTimeout(timeout); });
-                return;
-            }
-            var href = localPaths[tried++];
-            loadCSS(href, function(){ loaded = true; clearTimeout(timeout); }, function(){ tryNext(); });
-        }
-        tryNext();
-    })();
-    </script>
     <link rel="alternate" type="application/rss+xml" title=" RSS" href="/api/poems/rss">
 </head>
 <body>
@@ -149,16 +102,7 @@
     <!-- Place theme toggle just before scripts for reliable DOM access -->
     <button class="theme-toggle bottom-left" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
 
-    <script>
-    // Apply theme immediately to prevent flash - this runs before any other scripts
-    (function() {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
-        }
-    })();
-    </script>
-    <script src="js/app.js"></script>
+    <script src="/js/init-theme-inline.js"></script>
+    <script src="js/app.js" defer></script>
 </body>
 </html>

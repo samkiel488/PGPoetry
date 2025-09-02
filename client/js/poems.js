@@ -122,7 +122,8 @@ function createPoemCard(poem) {
     try {
         log(`Creating poem card for: ${poem.title}`, 'info');
         
-        const excerpt = truncateText(poem.content);
+        // Show full content in the listing (no 'See more' behavior)
+        const excerpt = poem.content || '';
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
         const { words, minutes } = getReadingTime(poem.content);
         const likes = poem.likes || 0;
@@ -133,7 +134,6 @@ function createPoemCard(poem) {
             <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
                 <p class="poem-excerpt">${excerpt}</p>
-                <div class="poem-full-content" aria-hidden="true" style="display:none;">${poem.content}</div>
                 <div class="poem-meta">
                     <span class="poem-date">${formatDate(poem.createdAt)}</span>
                     <div class="poem-tags">${tags}</div>
@@ -141,12 +141,11 @@ function createPoemCard(poem) {
                     <span class="poem-reading">${minutes} min read</span>
                 </div>
                 <div class="poem-stats">
-                    <span class="poem-likes">❤️ ${likes} likes</span>
                     <span class="poem-views">👁️ ${views} views</span>
                 </div>
-                <button class="see-more btn" aria-expanded="false">See more</button>
-                <button class="like-btn${isLiked ? ' liked' : ''}" data-poem-id="${poem._id}" ${isLiked ? 'disabled' : ''}>
-                    <span class="like-icon">&#10084;</span> <span class="like-text">${isLiked ? 'Liked' : 'Like'}</span>
+                <button class="like-btn${isLiked ? ' liked' : ''}" data-poem-id="${poem._id}" aria-label="Like this poem" ${isLiked ? 'disabled' : ''}>
+                    <span class="like-icon">&#10084;</span>
+                    <span class="like-count">${likes}</span>
                 </button>
             </div>
         `;
@@ -164,6 +163,7 @@ const likedPoems = new Set();
 
 // Like button handler with rate limiting
 async function likePoem(btn, poemId) {
+    let success = false;
     try {
         log(`Like button clicked for poem: ${poemId}`, 'info');
         if (!btn || !poemId) {
@@ -180,19 +180,24 @@ async function likePoem(btn, poemId) {
 
         // Disable button and show loading state
         btn.disabled = true;
-        const likeTextEl = btn.querySelector('.like-text');
-        const originalText = likeTextEl ? likeTextEl.textContent : '';
-        if (likeTextEl) likeTextEl.textContent = 'Liking...';
+        const likeCountEl = btn.querySelector('.like-count');
+        const originalCount = likeCountEl ? parseInt(likeCountEl.textContent, 10) || 0 : 0;
+        if (likeCountEl) likeCountEl.textContent = '...';
 
         // Add rate limiting delay
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/like`, { method: 'POST' });
+        const data = await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/like`, { method: 'POST' });
 
-        // Mark as liked
+        // Update UI with returned likes count when available
+        const newLikes = data && typeof data.likes === 'number' ? data.likes : originalCount + 1;
+        if (likeCountEl) likeCountEl.textContent = newLikes;
+
+        // Mark as liked and keep disabled to prevent further likes
         likedPoems.add(poemId);
         btn.classList.add('liked');
-        if (likeTextEl) likeTextEl.textContent = 'Liked';
+        btn.disabled = true;
+        success = true;
 
         log(`Poem liked successfully: ${poemId}`, 'success');
         showNotification('Poem liked!', 'success');
@@ -203,12 +208,12 @@ async function likePoem(btn, poemId) {
 
         // Reset button state on error
         if (btn) {
-            const likeTextEl = btn.querySelector('.like-text');
-            if (likeTextEl) likeTextEl.textContent = 'Like';
+            const likeCountEl = btn.querySelector('.like-count');
+            if (likeCountEl) likeCountEl.textContent = likeCountEl.getAttribute('data-original') || '0';
             btn.classList.remove('liked');
         }
     } finally {
-        if (btn) btn.disabled = false;
+        if (btn && !success) btn.disabled = false;
     }
 }
 
@@ -507,7 +512,6 @@ function setupPoemCardEvents() {
         document.addEventListener('click', function(e) {
             const poemCard = e.target.closest('.poem-card');
             const likeBtn = e.target.closest('.like-btn');
-            const seeMoreBtn = e.target.closest('.see-more');
             
             if (likeBtn) {
                 e.preventDefault();
@@ -517,27 +521,6 @@ function setupPoemCardEvents() {
                     log(`Like button clicked for poem: ${poemId}`, 'info');
                     // Pass the actual button element to likePoem
                     likePoem(likeBtn, poemId);
-                }
-            } else if (seeMoreBtn) {
-                e.preventDefault();
-                e.stopPropagation();
-                const card = seeMoreBtn.closest('.poem-card');
-                if (!card) return;
-                const full = card.querySelector('.poem-full-content');
-                const excerpt = card.querySelector('.poem-excerpt');
-                const expanded = seeMoreBtn.getAttribute('aria-expanded') === 'true';
-                if (expanded) {
-                    // collapse
-                    if (full) full.style.display = 'none';
-                    if (excerpt) excerpt.style.display = 'block';
-                    seeMoreBtn.textContent = 'See more';
-                    seeMoreBtn.setAttribute('aria-expanded', 'false');
-                } else {
-                    // expand
-                    if (full) full.style.display = 'block';
-                    if (excerpt) excerpt.style.display = 'none';
-                    seeMoreBtn.textContent = 'Show less';
-                    seeMoreBtn.setAttribute('aria-expanded', 'true');
                 }
             } else if (poemCard) {
                 const slug = poemCard.getAttribute('data-poem-slug');

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - PG'sPoeticPen</title>
-    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/admin/css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
@@ -37,47 +37,7 @@
 
     <!-- Theme toggle positioned at bottom left -->
     <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
-
-    <script>
-        // Theme management
-        const ThemeManager = {
-            init() {
-                this.setupToggle();
-                this.loadTheme();
-            },
-            
-            setupToggle() {
-                const toggle = document.getElementById('theme-toggle');
-                if (!toggle) return;
-                
-                toggle.addEventListener('click', () => {
-                    const isDark = document.body.classList.contains('dark-theme');
-                    this.setTheme(!isDark);
-                });
-            },
-            
-            setTheme(isDark) {
-                if (isDark) {
-                    document.body.classList.add('dark-theme');
-                    localStorage.setItem('theme', 'dark');
-                    document.getElementById('theme-icon').textContent = '☀️';
-                } else {
-                    document.body.classList.remove('dark-theme');
-                    localStorage.setItem('theme', 'light');
-                    document.getElementById('theme-icon').textContent = '🌙';
-                }
-            },
-            
-            loadTheme() {
-                const theme = localStorage.getItem('theme');
-                this.setTheme(theme === 'dark');
-            }
-        };
-
-        // Initialize theme
-        ThemeManager.init();
-    </script>
-
-    <script src="/js/login.js"></script>
+    <script src="/admin/js/init-admin-theme.js" defer></script>
+    <script src="/admin/js/login.js" defer></script>
 </body>
 </html>

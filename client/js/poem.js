@@ -127,23 +127,30 @@ async function loadPoem() {
         
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
         const { words, minutes } = calculateReadingStats(poem.content);
-        
+
+        // Convert plain-text poem content into paragraphs preserving line breaks
+        const paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => {
+            // replace single newlines within a paragraph with <br>
+            const inner = p.replace(/\n/g, '<br>');
+            return `<p>${inner}</p>`;
+        }).join('');
+
         const poemHTML = `
             <div class="poem-header">
                 <h1>${poem.title}</h1>
                 <p class="poem-date">${formatDate(poem.createdAt)}</p>
                 <div class="poem-tags">${tags}</div>
-                <div class="poem-actions">
-                    <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
-                    <button class="share-btn" id="share-btn">Share</button>
-                    <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
-                </div>
             </div>
-            <div class="poem-content">${poem.content}</div>
+            <div class="poem-content" aria-label="Poem text">${paragraphs}</div>
             <div class="poem-extra">
                 <span id="poem-words">${words} words</span>
                 <span id="poem-reading">${minutes} min read</span>
                 <span id="poem-views">${poem.views || 0} views</span>
+            </div>
+            <div class="poem-actions">
+                <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
+                <button class="share-btn" id="share-btn">Share</button>
+                <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
             </div>
         `;
         
@@ -157,9 +164,9 @@ async function loadPoem() {
         log(`Error loading poem: ${error.message}`, 'error');
         const container = document.getElementById('poem-container');
         if (container) {
-            container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Poem not found or error loading poem.</p>';
+            container.innerHTML = '<p style="text-align: center; color: #e74c3c;">Error loading poem, Please kindly check your internet connection.</p>';
         }
-        showNotification('Poem not found or has been removed.', 'error');
+        showNotification('Error loading poem, Please kindly check your internet connection.', 'error');
     } finally {
         const loading = document.getElementById('loading');
         if (loading) {

@@ -91,15 +91,15 @@ function showNotification(message, type = 'info', title = '') {
 }
 
 // Get DOM elements
-const poemsList = document.getElementById('poems-list');
-const newPoemBtn = document.getElementById('new-poem-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const poemModal = document.getElementById('poem-modal');
-const closeModal = document.getElementById('close-modal');
-const cancelBtn = document.getElementById('cancel-btn');
-const poemForm = document.getElementById('poem-form');
-const modalTitle = document.getElementById('modal-title');
-const themeToggle = document.getElementById('theme-toggle');
+const poemsList = document.getElementById('poems-list') || null;
+const newPoemBtn = document.getElementById('new-poem-btn') || null;
+const logoutBtn = document.getElementById('logout-btn') || null;
+const poemModal = document.getElementById('poem-modal') || null;
+const closeModal = document.getElementById('close-modal') || null;
+const cancelBtn = document.getElementById('cancel-btn') || null;
+const poemForm = document.getElementById('poem-form') || null;
+const modalTitle = document.getElementById('modal-title') || null;
+const themeToggle = document.getElementById('theme-toggle') || null;
 
 // Check authentication
 function checkAuth() {
@@ -367,46 +367,48 @@ function setupPreviewButton() {
 }
 
 // Form submission handler
-poemForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+if (poemForm) {
+    poemForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-    try {
-        log('Poem form submitted', 'info');
-        const formData = new FormData(poemForm);
-        const poemData = {
-            title: formData.get('title'),
-            content: formData.get('content'),
-            tags: formData.get('tags').split(',').map(tag => tag.trim()).filter(tag => tag),
-            featured: formData.get('featured') === 'on'
-        };
+        try {
+            log('Poem form submitted', 'info');
+            const formData = new FormData(poemForm);
+            const poemData = {
+                title: formData.get('title'),
+                content: formData.get('content'),
+                tags: formData.get('tags') ? formData.get('tags').split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+                featured: formData.get('featured') === 'on'
+            };
 
-        log(`Poem data prepared: ${poemData.title}`, 'info');
+            log(`Poem data prepared: ${poemData.title}`, 'info');
 
-        const url = currentPoemId 
-            ? `${API_BASE}/poems/${currentPoemId}`
-            : `${API_BASE}/poems`;
-        const method = currentPoemId ? 'PUT' : 'POST';
+            const url = currentPoemId 
+                ? `${API_BASE}/poems/${currentPoemId}`
+                : `${API_BASE}/poems`;
+            const method = currentPoemId ? 'PUT' : 'POST';
 
-        await fetchWithErrorHandling(url, {
-            method,
-            headers: getAuthHeaders(),
-            body: JSON.stringify(poemData)
-        });
+            await fetchWithErrorHandling(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(poemData)
+            });
 
-        closePoemModal();
-        loadPoems();
+            if (typeof closePoemModal === 'function') closePoemModal();
+            loadPoems();
 
-        const message = currentPoemId ? 'Poem updated successfully!' : 'Poem created successfully!';
-        log(message, 'success');
-        showNotification(message, 'success');
+            const message = currentPoemId ? 'Poem updated successfully!' : 'Poem created successfully!';
+            log(message, 'success');
+            showNotification(message, 'success');
 
-    } catch (error) {
-        log(`Error saving poem: ${error.message}`, 'error');
-        // Show server-provided message when available
-        const msg = error.message || 'Network error. Please try again.';
-        showNotification(msg, 'error');
-    }
-});
+        } catch (error) {
+            log(`Error saving poem: ${error.message}`, 'error');
+            // Show server-provided message when available
+            const msg = error.message || 'Network error. Please try again.';
+            showNotification(msg, 'error');
+        }
+    });
+}
 
 // Delete poem
 async function deletePoem(poemId) {

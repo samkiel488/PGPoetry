@@ -1156,27 +1156,83 @@ button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding:
   .analytics-controls { justify-content: space-between; }
 }
 
-/* Small-device header centering and mobile nav adjustments */
+/* Small-device poem layout and action button improvements */
+@media (max-width: 480px) {
+  /* reduce overall article padding and margins for compact mobile view */
+  .poem-article {
+    padding: 0.6rem 0.6rem;
+    margin: 0.6rem;
+    max-width: 100%;
+  }
+
+  .poem-header h1 { font-size: 1.05rem; }
+  .poem-content { font-size: 0.95rem; line-height: 1.8; padding: 0.7rem; }
+
+  /* Make action buttons more touch-friendly while keeping them visually prominent */
+  .poem-actions {
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .poem-actions button {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.95rem;
+    min-width: 88px;
+    border-radius: 8px;
+    box-shadow: 0 6px 14px rgba(16,24,40,0.06);
+  }
+
+  /* Like button visuals for mobile and desktop: bright gradient when liked */
+  .like-btn {
+    background: linear-gradient(90deg, #667eea 0%, #5a67d8 100%);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .like-btn .like-count { font-weight: 700; }
+  .like-btn.liked {
+    background: linear-gradient(90deg, #ff7b7b 0%, #ff5252 100%);
+    transform: none;
+  }
+
+  /* Keep buttons accessible on focus */
+  .poem-actions button:focus { outline: 3px solid rgba(102,126,234,0.18); outline-offset: 2px; }
+}
+
+/* Desktop enhancements: make like state visible with slight shadow */
+@media (min-width: 769px) {
+  .poem-actions button {
+    box-shadow: 0 8px 20px rgba(16,24,40,0.06);
+  }
+  .like-btn.liked {
+    background: linear-gradient(90deg, #ff6b6b 0%, #ff4757 100%);
+  }
+}
+
+/* Poem page small-screen tweaks: center nav, emphasize quotes, smaller action buttons */
 @media (max-width: 768px) {
-    .nav {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.75rem 1rem;
-    }
-    .nav-brand {
-        text-align: center;
-        margin-bottom: 0;
-    }
-    /* Ensure tagline is visible on very small screens */
-    .nav-brand p { display: block; font-size: 0.9rem; color: #7f8c8d; margin: 0; }
-    .nav-menu {
-        width: 100%;
-        justify-content: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-top: 0.25rem;
-    }
-    .nav-menu li { list-style: none; }
-    .nav-menu .nav-link { padding: 0.35rem 0.6rem; }
+  /* ensure header/nav centered on small devices (applies site-wide) */
+  .nav { flex-direction: column; align-items: center; gap: 0.4rem; }
+  .nav-brand { text-align: center; }
+  .nav-menu { justify-content: center; }
+
+  /* make quotation marks slightly more prominent on smaller screens */
+  .poem-content::before, .poem-content::after { color: rgba(102,126,234,0.14); }
+
+  /* reduce action button size specifically for poem view */
+  .poem-actions button {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.9rem;
+    min-width: 72px;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 420px) {
+  .poem-actions button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+    min-width: 64px;
+  }
 }

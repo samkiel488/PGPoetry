@@ -66,7 +66,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files - Updated for Render deployment
 app.use(express.static(path.join(__dirname, '..', 'client')));
-app.use(express.static(path.join(__dirname, '..', 'admin')));
+// Serve admin static under the /admin path so requests like /admin/dashboard.html resolve
+app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
 // Serve root-level css folder so requests to /css/* resolve when CSS is stored at project-root/css
 app.use('/css', express.static(path.join(__dirname, '..', 'css')));
 
@@ -95,6 +96,10 @@ app.get('/admin', (req, res) => {
 });
 
 app.get('/admin/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin', 'dashboard.html'));
+});
+// Also serve /admin/dashboard.html explicitly to match browser requests that include the .html suffix
+app.get('/admin/dashboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin', 'dashboard.html'));
 });
 
