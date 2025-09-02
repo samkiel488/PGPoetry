@@ -10,7 +10,8 @@
         return l;
     }
     var localPaths = ['/css/all.min.css', 'css/all.min.css', '../css/all.min.css'];
-    var cdnHref = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+    // fall back to the latest v6.x Font Awesome on jsDelivr (matches local bundle)
+    var cdnHref = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css';
     var loaded = false;
     var tried = 0;
     var timeout = setTimeout(function(){ if(!loaded){ loadCSS(cdnHref); } }, 3000);

@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - PG'sPoeticPen</title>
     <link rel="stylesheet" href="/admin/css/admin.css">
+    <!-- Font Awesome: prefer local bundle, fallback loader will load latest CDN if needed -->
+    <link rel="stylesheet" href="/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+    <script src="/js/load-css-fallback.js" defer></script>
 </head>
 <body>
     <header class="admin-header">
@@ -107,7 +110,7 @@
 
     <div class="footer-bottom">
         <p>&copy; <span id="copyright-year">2025</span> PG'sPoeticPen. All rights reserved.</p>
-        <p class="footer-tagline">Website Designed and Developed by <a href="https://www.samkiel-dev.vercel.app" target="_blank">SAMKIEL</a> </p>
+        <p class="footer-tagline">Website Designed and Developed by <a href="https://samkiel-dev.vercel.app" target="_blank">SAMKIEL</a> </p>
     </div>
     <script src="/admin/js/init-admin-theme.js" defer></script>
     <script src="/admin/js/dashboard.js" defer></script>
