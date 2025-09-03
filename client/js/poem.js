@@ -168,6 +168,25 @@ async function loadPoem() {
                 copy: window.location.href
             };
             renderShareButtons(shareLinks);
+            // Add share menu container (for advanced share actions)
+            const container = document.getElementById('poem-container');
+            if (container) {
+                const menu = document.createElement('div');
+                menu.className = 'share-menu';
+                menu.id = 'share-menu';
+                menu.innerHTML = `
+                    <div class="share-option copy" id="share-copy">
+                        <span class="icon">📋</span><span>Copy poem & link</span>
+                    </div>
+                    <div class="share-option image" id="share-image">
+                        <span class="icon">🖼️</span><span>Share as image</span>
+                    </div>
+                    <div class="share-option social" id="share-socials">
+                        <span class="icon">🔗</span><span>Share to social sites</span>
+                    </div>
+                `;
+                container.appendChild(menu);
+            }
         } catch (e) {
             console.error('Error fetching share links', e);
         }
@@ -287,8 +306,14 @@ function setupPoemInteractions(poem) {
                         showNotification('Share cancelled or failed.', 'warning');
                     });
                 } else {
-                    log('Share API not supported, showing fallback message', 'warn');
-                    showNotification('Share not supported on this device. Use the copy link button.', 'warning');
+                    // Toggle the share menu as fallback
+                    const menu = document.getElementById('share-menu');
+                    if (menu) {
+                        menu.classList.toggle('visible');
+                    } else {
+                        log('Share API not supported, showing fallback message', 'warn');
+                        showNotification('Share not supported on this device. Use the copy link button.', 'warning');
+                    }
                 }
             };
             log('Share button setup completed', 'success');
@@ -311,6 +336,106 @@ function setupPoemInteractions(poem) {
                 });
             };
             log('Copy link button setup completed', 'success');
+        }
+
+        // Share menu option handlers
+        const shareCopy = document.getElementById('share-copy');
+        if (shareCopy) {
+            shareCopy.addEventListener('click', function() {
+                try {
+                    // Copy poem text + link
+                    const text = `${poem.title}\n\n${poem.content}\n\nRead more: ${window.location.href}`;
+                    navigator.clipboard.writeText(text).then(() => {
+                        showNotification('Poem and link copied to clipboard', 'success');
+                    }).catch(async () => {
+                        // fallback to input
+                        const fake = document.createElement('textarea');
+                        fake.value = text;
+                        document.body.appendChild(fake);
+                        fake.select();
+                        try { document.execCommand('copy'); showNotification('Poem and link copied to clipboard', 'success'); } catch (e) { showNotification('Copy failed', 'error'); }
+                        document.body.removeChild(fake);
+                    });
+                } catch (e) {
+                    console.error('share-copy error', e);
+                    showNotification('Could not copy', 'error');
+                }
+            });
+        }
+
+        const shareImage = document.getElementById('share-image');
+        if (shareImage) {
+            shareImage.addEventListener('click', async function() {
+                try {
+                    // Render poem text into a simple canvas image
+                    const lines = (poem.content || '').split(/\n/);
+                    const canvas = document.createElement('canvas');
+                    const width = 1200;
+                    const lineHeight = 36;
+                    const padding = 60;
+                    const height = padding * 2 + Math.min(800, lines.length * lineHeight);
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    // bg
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0,0,width,height);
+                    // title
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.font = 'bold 36px serif';
+                    ctx.fillText(poem.title, padding, padding);
+                    // body
+                    ctx.fillStyle = '#444';
+                    ctx.font = '20px serif';
+                    let y = padding + 48;
+                    ctx.textBaseline = 'top';
+                    for (let i=0;i<lines.length && y < height - padding; i++) {
+                        const line = lines[i];
+                        // simple wrap
+                        ctx.fillText(line, padding, y);
+                        y += lineHeight;
+                    }
+                    // convert to blob
+                    canvas.toBlob(async function(blob) {
+                        if (!blob) return showNotification('Could not generate image', 'error');
+                        const file = new File([blob], `${(poem.title || 'poem').replace(/[^a-z0-9]/gi,'_')}.png`, { type: 'image/png' });
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({ files: [file], title: poem.title, text: poem.title });
+                                showNotification('Image shared', 'success');
+                            } catch (e) {
+                                showNotification('Share failed', 'error');
+                            }
+                        } else {
+                            // download fallback
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = `${(poem.title || 'poem').replace(/[^a-z0-9]/gi,'_')}.png`;
+                            document.body.appendChild(a); a.click(); a.remove();
+                            URL.revokeObjectURL(url);
+                            showNotification('Image downloaded', 'success');
+                        }
+                    });
+                } catch (e) {
+                    console.error('share-image error', e);
+                    showNotification('Could not create image', 'error');
+                }
+            });
+        }
+
+        const shareSocials = document.getElementById('share-socials');
+        if (shareSocials) {
+            shareSocials.addEventListener('click', function() {
+                // open share links section already rendered by renderShareButtons
+                const shareButtons = document.querySelector('.share-buttons');
+                if (shareButtons) {
+                    shareButtons.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    shareButtons.style.outline = '3px solid rgba(102,126,234,0.12)';
+                    setTimeout(() => { shareButtons.style.outline = ''; }, 1500);
+                } else {
+                    showNotification('Social share options not available', 'warning');
+                }
+            });
         }
         
         log('All poem interactions setup completed', 'success');

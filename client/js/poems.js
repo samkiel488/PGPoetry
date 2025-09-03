@@ -140,13 +140,13 @@ function createPoemCard(poem) {
                     <span class="poem-words">${words} words</span>
                     <span class="poem-reading">${minutes} min read</span>
                 </div>
-                <div class="poem-stats">
-                    <span class="poem-views">👁️ ${views} views</span>
-                </div>
-                <button class="like-btn${isLiked ? ' liked' : ''}" data-poem-id="${poem._id}" aria-label="Like this poem" ${isLiked ? 'disabled' : ''}>
-                    <span class="like-icon">&#10084;</span>
-                    <span class="like-count">${likes}</span>
-                </button>
+                        <div class="poem-stats">
+                            <span class="poem-views">👁️ ${views} views</span>
+                            <button class="like-btn inline-like ${isLiked ? 'liked' : ''}" data-poem-id="${poem._id}" aria-label="Like this poem" ${isLiked ? 'disabled' : ''}>
+                                <span class="like-icon">❤</span>
+                                <span class="like-count">${likes}</span>
+                            </button>
+                        </div>
             </div>
         `;
         

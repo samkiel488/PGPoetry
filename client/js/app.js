@@ -1,14 +1,12 @@
 // API base URL
 const API_BASE = '/api';
 
-// Theme toggle
-const themeToggle = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
-
+// Theme toggle: attach after DOM ready so elements exist
 function applyTheme(theme) {
     document.body.classList.toggle('dark-theme', theme === 'dark');
     document.body.classList.toggle('dark', theme === 'dark');
     document.documentElement.classList.toggle('dark', theme === 'dark');
+    const themeIcon = document.getElementById('theme-icon');
     if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
@@ -17,16 +15,20 @@ function initTheme() {
     applyTheme(saved);
 }
 
+// Initialize immediately so page picks up saved theme
 initTheme();
 
-if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-        const current = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
-        const next = current === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', next);
-        applyTheme(next);
-    });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            try { localStorage.setItem('theme', next); } catch(e){}
+            applyTheme(next);
+        });
+    }
+});
 
 // Sync across tabs
 window.addEventListener('storage', (e) => {
