@@ -1,4 +1,4 @@
-Replay Vishnu Nagar song from. // API base URL
+// API base URL
 const API_BASE = '/api';
 
 // Global variables
@@ -305,6 +305,7 @@ async function loadPoems() {
         console.log('API response raw:', response);
         if (Array.isArray(response) && response.length > 0) {
             console.log('First poem object:', response[0]);
+            console.log('Poem fields:', Object.keys(response[0]));
         }
         // Only accept array response from API
         if (Array.isArray(response)) {
@@ -316,6 +317,15 @@ async function loadPoems() {
         }
         filteredPoems = allPoems;
         log(`Loaded ${allPoems.length} poems successfully`, 'success');
+
+        // Debug: Check if container exists
+        const container = document.getElementById('poems-container');
+        console.log('Poems container element:', container);
+        if (!container) {
+            log('Poems container not found in DOM', 'error');
+            return;
+        }
+
         // Generate tag filters after loading poems
         generateTagFilters();
         renderPoems();

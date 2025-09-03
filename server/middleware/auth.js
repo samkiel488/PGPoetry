@@ -12,6 +12,18 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Handle admin user (mock user with string ID)
+    if (decoded.id === 'admin-user') {
+      req.user = {
+        _id: 'admin-user',
+        username: decoded.username || 'admin',
+        role: 'admin'
+      };
+      return next();
+    }
+
+    // Handle regular users with MongoDB ObjectId
     const user = await User.findById(decoded.id).select('-password -refreshToken').lean();
     if (!user) return res.status(401).json({ message: 'Invalid token.' });
 

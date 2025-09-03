@@ -521,3 +521,71 @@ body.dark-theme .success-message { background:#06374b; color:#b6fff4; border-col
 
 /* Analytics spacing and chart container */
 .analytics-chart { min-height: 220px; background: transparent; }
+
+/* Analytics items and bars */
+.analytics-item {
+    background: linear-gradient(180deg, #ffffff, #fafbfc);
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16,24,40,0.04);
+    margin-bottom: 0.75rem;
+    border-left: 4px solid #667eea;
+}
+
+.analytics-item h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.analytics-meta {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.analytics-bar-wrap {
+    background: #f3f4f6;
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.analytics-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.8s ease-out;
+}
+
+.analytics-legend {
+    font-size: 0.85rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Dark theme analytics styles */
+.dark-theme .analytics-item {
+    background: linear-gradient(180deg, #1f2326, #161718);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    border-left-color: #667eea;
+}
+
+.dark-theme .analytics-item h4 {
+    color: #f8fafc;
+}
+
+.dark-theme .analytics-meta {
+    color: #9aa4b2;
+}
+
+.dark-theme .analytics-bar-wrap {
+    background: #374151;
+}
+
+.dark-theme .analytics-legend {
+    color: #d1e0ea;
+}

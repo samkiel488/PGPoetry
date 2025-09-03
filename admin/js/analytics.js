@@ -12,7 +12,7 @@ async function fetchAnalytics(endpoint){
     if (!token) {
       log('No admin token found, redirecting to login', 'warn');
       window.location.href = '/admin';
-      return;
+      return null;
     }
     const res = await fetch(`${API_BASE}/poems/analytics/${endpoint}`, {
       headers: {
@@ -23,10 +23,16 @@ async function fetchAnalytics(endpoint){
     if (res.status === 401) {
       log('Unauthorized for analytics endpoint, redirecting to login', 'warn');
       localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminRefreshToken');
+      localStorage.removeItem('adminUser');
       window.location.href = '/admin';
-      return;
+      return null;
     }
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) {
+      const errorText = await res.text();
+      log(`Analytics endpoint error: ${res.status} - ${errorText}`, 'error');
+      throw new Error(`HTTP ${res.status}: ${errorText}`);
+    }
     return await res.json();
   } catch (e) {
     log(`Failed to fetch analytics ${endpoint}: ${e.message}`, 'error');
@@ -95,6 +101,13 @@ async function loadAnalytics(){
     }
     const topLiked = await fetchAnalytics('top-liked');
     const topViewed = await fetchAnalytics('top-viewed');
+
+    // Check if authentication failed (null return values)
+    if (topLiked === null || topViewed === null) {
+      log('Authentication failed during analytics fetch', 'warn');
+      return;
+    }
+
     const topLikedEl = document.getElementById('top-liked');
     const topViewedEl = document.getElementById('top-viewed');
     renderTopLiked(topLikedEl, topLiked);

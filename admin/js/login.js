@@ -43,17 +43,46 @@ document.addEventListener('DOMContentLoaded', function() {
             try { data = await response.json(); } catch (err) { /* ignore JSON parse errors */ }
 
             if (response.ok) {
-                // Store token in localStorage
-                if (data && data.token) localStorage.setItem('adminToken', data.token);
+                // Store tokens in localStorage
+                if (data && data.accessToken) {
+                    localStorage.setItem('adminToken', data.accessToken);
+                    localStorage.setItem('adminRefreshToken', data.refreshToken || '');
+                    localStorage.setItem('adminUser', JSON.stringify(data.user || {}));
 
-                // Redirect to dashboard (explicit .html to avoid server routing mismatch)
-                window.location.href = '/admin/dashboard.html';
+                    // Show success message
+                    iziToast.success({
+                        title: 'Success',
+                        message: 'Login successful! Redirecting...',
+                        position: 'topRight',
+                        timeout: 2000
+                    });
+
+                    // Redirect to dashboard after a short delay
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard.html';
+                    }, 1000);
+                } else {
+                    showError('Login successful but no token received. Please try again.');
+                }
             } else {
-                showError((data && data.message) || `Login failed (${response.status})`);
+                // Handle specific error cases
+                let errorMessage = 'Login failed';
+                if (data && data.message) {
+                    errorMessage = data.message;
+                } else if (response.status === 400) {
+                    errorMessage = 'Missing username or password';
+                } else if (response.status === 401) {
+                    errorMessage = 'Invalid username or password';
+                } else if (response.status === 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                } else {
+                    errorMessage = `Login failed (${response.status})`;
+                }
+                showError(errorMessage);
             }
         } catch (error) {
             console.error('Login error:', error);
-            showError('Network error. Please try again.');
+            showError('Network error. Please check your connection and try again.');
         }
     });
 

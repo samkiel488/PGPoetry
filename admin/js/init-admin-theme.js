@@ -27,6 +27,8 @@
         var next = current === 'dark' ? 'light' : 'dark';
         try { localStorage.setItem('theme', next); } catch(e){}
         applyThemeClasses(next === 'dark');
+        // Dispatch a custom event to notify other scripts of theme change
+        window.dispatchEvent(new Event('themechange'));
       });
     }
   });
@@ -35,6 +37,7 @@
   window.addEventListener('storage', function(e){
     if (e.key === 'theme') {
       applyThemeClasses(e.newValue === 'dark');
+      window.dispatchEvent(new Event('themechange'));
     }
   });
 })();

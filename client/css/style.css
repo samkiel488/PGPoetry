@@ -1,4 +1,4 @@
-Mom. Choose and play. /* 404 page styles */
+/* 404 page styles */
 body.notfound {
     text-align: center;
     padding: 5rem 1rem;
@@ -85,10 +85,12 @@ body.dark .theme-toggle {
 
 .loading-text {
     margin-top: 0.5rem;
-.image-preview-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity .18s ease; z-index: 20000; }
+}
+
+.image-preview-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity .18s ease; z-index: 99999; }
 .image-preview-modal.visible { pointer-events: auto; opacity: 1; }
-.image-preview-modal .ip-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
-.image-preview-modal .ip-dialog { position: relative; width: min(900px, 95%); max-height: 90vh; background: var(--card-bg, #fff); color: var(--text, #111); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); overflow: hidden; display: flex; flex-direction: column; pointer-events: auto; }
+.image-preview-modal .ip-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); z-index: 99990; }
+.image-preview-modal .ip-dialog { position: relative; z-index: 99999; width: min(820px, 92%); max-height: 80vh; background: var(--card-bg, #fff); color: var(--text, #111); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.35); overflow: hidden; display: flex; flex-direction: column; pointer-events: auto; }
 /* DEBUG: make dialog visually obvious */
 .image-preview-modal.debug .ip-dialog { background: #fff2cc !important; padding: 28px !important; border: 3px solid #ff9900 !important; box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important; }
 .image-preview-modal .ip-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid rgba(0,0,0,0.06); }
@@ -97,13 +99,26 @@ body.dark .theme-toggle {
 .image-preview-modal .ip-controls { display:flex; gap:8px; align-items:center; padding:12px 16px; flex-wrap:wrap; border-bottom:1px solid rgba(0,0,0,0.04); }
 .image-preview-modal .ip-controls label { font-size:0.9rem; display:flex; gap:6px; align-items:center; }
 .image-preview-modal .ip-controls select, .image-preview-modal .ip-controls input[type="checkbox"] { margin-left:6px; }
-.image-preview-modal .ip-preview { padding:16px; overflow:auto; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); min-height:320px; }
+.image-preview-modal .ip-preview { padding:16px; overflow:auto; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); min-height:240px; }
+.image-preview-modal .ip-preview img { max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
 .image-preview-modal .ip-loading, .image-preview-modal .ip-error { color: #666; }
 
+/* small spinner inside modal */
+.ip-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+.ip-loading .loading-text { color: var(--muted, #6b7280); }
+
+/* samples strip */
+.ip-samples { background: transparent; }
+.ip-sample { cursor: pointer; width: 150px; flex: 0 0 150px; }
+.ip-sample .ip-sample-box { background: #f6f7fb; border-radius: 6px; overflow: hidden; height: 100px; display:flex; align-items:center; justify-content:center; }
+.ip-sample img { display:block; width:100%; height:100%; object-fit: cover; }
+.ip-sample:focus, .ip-sample:hover { outline: 2px solid rgba(102,126,234,0.14); transform: translateY(-2px); }
+
 /* Dark theme tweaks */
-body.dark .image-preview-modal .ip-dialog { background: #0f1720; color: #e6eef8; border: 1px solid rgba(255,255,255,0.04); }
-    color: #888;
-    text-align: center;
+body.dark .image-preview-modal .ip-dialog {
+    background: #0f1720;
+    color: #e6eef8;
+    border: 1px solid rgba(255,255,255,0.04);
 }
 
 /* Scroll to top button styles */
@@ -1133,7 +1148,7 @@ body.dark .social-icon:hover {
     .main {
         padding: 1rem;
     }
-.footer-tagline
+
     .poems-grid {
         grid-template-columns: 1fr;
     }
@@ -1148,31 +1163,6 @@ body.dark .social-icon:hover {
 }
 
 /* Responsive adjustments (concise) */
-/* Base grid for poems */
-.poems-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    align-items: start;
-}
-
-.poem-card {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    width: 100%;
-}
-.poem-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-
-.poems-section { padding: 2rem; }
-.search-input { width: 100%; box-sizing: border-box; }
-.tag-filters { display:flex; gap:0.5rem; flex-wrap:wrap; margin: 0.75rem 0; }
-
-.footer .footer-content { display: flex; gap: 2rem; justify-content: space-between; align-items: flex-start; max-width: 1200px; margin: 0 auto; padding: 2rem; }
-.footer .footer-social .social-icons { display:flex; gap:0.5rem; flex-wrap:wrap; }
-
 /* Make header/nav responsive without adding JS (simple stacking) */
 .nav { padding: 1rem; }
 .nav-menu { gap: 1rem; display:flex; flex-wrap:wrap; }
@@ -1253,7 +1243,7 @@ button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding:
   }
 
   .poem-header h1 { font-size: 1.05rem; }
-  .poem-content { font-size: 0.95rem; line-height: 1.8; padding: 0.7rem; }
+        }
 
   /* Make action buttons more touch-friendly while keeping them visually prominent */
   .poem-actions {

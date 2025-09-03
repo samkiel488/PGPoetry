@@ -44,34 +44,43 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { identifier, password } = req.body; // identifier can be username or email
-    if (!identifier || !password) return res.status(400).json({ message: 'Missing fields' });
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    // Check against hardcoded credentials from .env
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (!user.password) {
-      console.warn('User has no password set', user._id);
+    if (!adminUsername || !adminPassword) {
+      console.error('Admin credentials not configured in .env file');
+      return res.status(500).json({ message: 'Server configuration error' });
+    }
+
+    // Simple credential check
+    if (username !== adminUsername || password !== adminPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    let match = false;
-    try {
-      match = await user.comparePassword(password);
-    } catch (cmpErr) {
-      console.error('password compare failed', cmpErr);
-      return res.status(500).json({ message: 'Login failed' });
-    }
-
-    if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+    // Create a mock user object for token generation
+    const mockUser = {
+      _id: 'admin-user',
+      username: adminUsername,
+      role: 'admin'
+    };
 
     // Sign tokens
-    const accessToken = signAccessToken(user);
-    const refreshToken = signRefreshToken(user);
-    user.refreshToken = refreshToken;
-    await user.save();
+    const accessToken = signAccessToken(mockUser);
+    const refreshToken = signRefreshToken(mockUser);
 
-    res.json({ accessToken, refreshToken, user: { id: user._id, username: user.username, role: user.role } });
+    res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: mockUser._id,
+        username: mockUser.username,
+        role: mockUser.role
+      }
+    });
   } catch (err) {
     console.error('login error', err && err.message ? err.message : err);
     if (err.message && err.message.includes('JWT_SECRET')) {

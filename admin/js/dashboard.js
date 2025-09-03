@@ -456,53 +456,18 @@ function logout() {
     }
 }
 
-// Theme toggle functionality
+// Theme toggle functionality is now handled by init-admin-theme.js
+// This function is kept for compatibility but delegates to the main theme system
 function setupThemeToggle() {
     try {
-        log('Setting up theme toggle', 'info');
-        
-        function setTheme(dark) {
-            try {
-                if (dark) {
-                    document.body.classList.add('dark-theme');
-                    localStorage.setItem('theme', 'dark');
-                    document.getElementById('theme-icon').textContent = '☀️';
-                    log('Dark theme applied', 'success');
-                } else {
-                    document.body.classList.remove('dark-theme');
-                    localStorage.setItem('theme', 'light');
-                    document.getElementById('theme-icon').textContent = '🌙';
-                    log('Light theme applied', 'success');
-                }
-            } catch (error) {
-                log(`Error setting theme: ${error.message}`, 'error');
-            }
-        }
-        
-        function initTheme() {
-            try {
-                const theme = localStorage.getItem('theme');
-                setTheme(theme === 'dark');
-                log(`Theme initialized: ${theme || 'light'}`, 'success');
-            } catch (error) {
-                log(`Error initializing theme: ${error.message}`, 'error');
-            }
-        }
-        
-        // Initialize theme
-        initTheme();
-        
-        // Add click event listener
-        if (themeToggle) {
-            themeToggle.onclick = function() {
-                log('Theme toggle clicked', 'info');
-                setTheme(!document.body.classList.contains('dark-theme'));
-            };
-            log('Theme toggle event listener attached', 'success');
-        } else {
-            log('Theme toggle element not found', 'error');
-        }
-        
+        log('Theme toggle setup delegated to init-admin-theme.js', 'info');
+
+        // Listen for theme changes from the main theme system
+        window.addEventListener('themechange', function() {
+            log('Theme change detected from main system', 'info');
+        });
+
+        log('Theme toggle setup completed (delegated)', 'success');
     } catch (error) {
         log(`Error setting up theme toggle: ${error.message}`, 'error');
     }

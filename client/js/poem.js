@@ -109,18 +109,42 @@ function wrapText(ctx, text, maxWidth) {
     return lines;
 }
 
-function generatePoemCanvas(poem, opts = {}) {
-    // opts: { theme: 'light'|'dark' }
+async function generatePoemCanvas(poem, opts = {}) {
+    // opts: { theme: 'light'|'dark', preset: 'classic'|'modern'|'compact'|'elegant'|'vintage' }
     const theme = opts.theme || 'light';
+    const preset = opts.preset || 'classic';
     // No watermark by default for clean export
     const watermark = false;
     // Use higher default scale for crisper images
     const scale = opts.scale || 3;
     // improved base card size and paddings
     const cardWidth = 1400; // px
-    const padding = 100;
-    const titleFontSize = 56;
-    const bodyFontSize = 28;
+    let padding = 100;
+
+    // Enhanced preset mapping with better typography
+    let titleFontSize = 56;
+    let bodyFontSize = 28;
+    let lineHeightMultiplier = 1.7;
+    let titleFontFamily = `'Crimson Text', 'Times New Roman', serif`;
+    let bodyFontFamily = `'Libre Baskerville', 'Georgia', serif`;
+
+    if (preset === 'modern') {
+        titleFontSize = 64; bodyFontSize = 30; padding = 110; lineHeightMultiplier = 1.85;
+        titleFontFamily = `'Montserrat', 'Helvetica Neue', sans-serif`;
+        bodyFontFamily = `'Open Sans', 'Arial', sans-serif`;
+    } else if (preset === 'compact') {
+        titleFontSize = 48; bodyFontSize = 22; padding = 80; lineHeightMultiplier = 1.55;
+        titleFontFamily = `'Poppins', 'Helvetica', sans-serif`;
+        bodyFontFamily = `'Roboto', 'Arial', sans-serif`;
+    } else if (preset === 'elegant') {
+        titleFontSize = 58; bodyFontSize = 26; padding = 120; lineHeightMultiplier = 1.8;
+        titleFontFamily = `'Playfair Display', 'Times New Roman', serif`;
+        bodyFontFamily = `'Crimson Text', 'Georgia', serif`;
+    } else if (preset === 'vintage') {
+        titleFontSize = 52; bodyFontSize = 24; padding = 100; lineHeightMultiplier = 1.75;
+        titleFontFamily = `'Old Standard TT', 'Times New Roman', serif`;
+        bodyFontFamily = `'Libre Baskerville', 'Georgia', serif`;
+    }
 
     // Create a temporary canvas to measure and draw
     const canvas = document.createElement('canvas');
@@ -130,17 +154,52 @@ function generatePoemCanvas(poem, opts = {}) {
     // we will compute height dynamically
     ctx.scale(scale, scale);
 
-    // Background
-    const bg = theme === 'dark' ? '#0f1720' : '#ffffff';
-    const textColor = theme === 'dark' ? '#e6eef8' : '#1f2937';
-    const metaColor = theme === 'dark' ? '#9fb6d6' : '#6b7280';
+    // Enhanced color schemes
+    let bgGradient, cardBg, textColor, metaColor, accentColor;
 
-    // Title measurements (prefer Playfair/serif stack)
-    ctx.font = `bold ${titleFontSize}px 'Playfair Display', Georgia, serif`;
+    if (theme === 'dark') {
+        bgGradient = ['#0f1720', '#1e293b', '#334155'];
+        cardBg = '#1e293b';
+        textColor = '#f1f5f9';
+        metaColor = '#94a3b8';
+        accentColor = '#60a5fa';
+    } else {
+        if (preset === 'elegant') {
+            bgGradient = ['#fef7ed', '#fed7aa', '#fdba74'];
+            cardBg = '#ffffff';
+            textColor = '#1f2937';
+            metaColor = '#6b7280';
+            accentColor = '#d97706';
+        } else if (preset === 'vintage') {
+            bgGradient = ['#f5f5f4', '#d6d3d1', '#a8a29e'];
+            cardBg = '#ffffff';
+            textColor = '#1c1917';
+            metaColor = '#78716c';
+            accentColor = '#a16207';
+        } else if (preset === 'modern') {
+            bgGradient = ['#f8fafc', '#e2e8f0', '#cbd5e1'];
+            cardBg = '#ffffff';
+            textColor = '#1e293b';
+            metaColor = '#64748b';
+            accentColor = '#3b82f6';
+        } else {
+            bgGradient = ['#ffffff', '#f8fafc', '#f1f5f9'];
+            cardBg = '#ffffff';
+            textColor = '#1f2937';
+            metaColor = '#6b7280';
+            accentColor = '#e74c3c';
+        }
+    }
+
+    // Wait for webfonts to be ready so measurements are accurate
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) { /* ignore */ }
+
+    // Title measurements with enhanced typography
+    ctx.font = `bold ${titleFontSize}px ${titleFontFamily}`;
     const titleLines = wrapText(ctx, poem.title || '', cardWidth - padding * 2);
 
-    // body paragraphs with improved typography (sans-serif stack)
-    ctx.font = `${bodyFontSize}px 'Source Sans Pro', Arial, sans-serif`;
+    // Body paragraphs with improved typography
+    ctx.font = `${bodyFontSize}px ${bodyFontFamily}`;
     const paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => p.replace(/\n/g, ' ').trim());
     const bodyLines = [];
     paragraphs.forEach((p, idx) => {
@@ -151,14 +210,14 @@ function generatePoemCanvas(poem, opts = {}) {
         }
     });
 
-    // Compute height
-    const lineHeight = Math.round(bodyFontSize * 1.7);
-    const paragraphGap = Math.round(bodyFontSize * 0.9);
-    const titleHeight = titleLines.length * Math.round(titleFontSize * 1.25);
+    // Compute height with better spacing
+    const lineHeight = Math.round(bodyFontSize * lineHeightMultiplier);
+    const paragraphGap = Math.round(bodyFontSize * 1.2);
+    const titleHeight = titleLines.length * Math.round(titleFontSize * 1.4);
     let bodyHeight = 0;
     bodyLines.forEach((ln) => { bodyHeight += (ln === null ? paragraphGap : lineHeight); });
-    const footerHeight = 90;
-    const cardHeight = Math.ceil(padding * 2 + titleHeight + 32 + bodyHeight + footerHeight);
+    const footerHeight = 100;
+    const cardHeight = Math.ceil(padding * 2 + titleHeight + 48 + bodyHeight + footerHeight);
 
     // resize canvas to final height (account for scale)
     canvas.height = cardHeight * scale;
@@ -166,31 +225,38 @@ function generatePoemCanvas(poem, opts = {}) {
     const ctx2 = canvas.getContext('2d');
     ctx2.scale(scale, scale);
 
-    // Fill background (optionally gradient)
-    if (theme === 'dark') {
-        ctx2.fillStyle = '#0b1220';
-        ctx2.fillRect(0, 0, cardWidth, cardHeight);
-        // subtle top gradient
-        const g = ctx2.createLinearGradient(0, 0, 0, cardHeight);
-        g.addColorStop(0, 'rgba(255,255,255,0.02)');
-        g.addColorStop(1, 'rgba(0,0,0,0.04)');
-        ctx2.fillStyle = g;
-        ctx2.fillRect(0, 0, cardWidth, cardHeight);
-    } else {
-        // light card with subtle radial vignette
-        ctx2.fillStyle = '#fff';
-        ctx2.fillRect(0, 0, cardWidth, cardHeight);
-        const g = ctx2.createLinearGradient(0, 0, 0, cardHeight);
-        g.addColorStop(0, 'rgba(231, 76, 60, 0.02)');
-        g.addColorStop(1, 'rgba(102,126,234,0.02)');
-        ctx2.fillStyle = g;
-        ctx2.fillRect(0, 0, cardWidth, cardHeight);
+    // Enhanced background with sophisticated gradients
+    const bgGradientObj = ctx2.createLinearGradient(0, 0, 0, cardHeight);
+    bgGradient.forEach((color, index) => {
+        bgGradientObj.addColorStop(index / (bgGradient.length - 1), color);
+    });
+    ctx2.fillStyle = bgGradientObj;
+    ctx2.fillRect(0, 0, cardWidth, cardHeight);
+
+    // Add subtle texture/noise for vintage preset
+    if (preset === 'vintage') {
+        ctx2.fillStyle = 'rgba(0,0,0,0.02)';
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * cardWidth;
+            const y = Math.random() * cardHeight;
+            const size = Math.random() * 2;
+            ctx2.fillRect(x, y, size, size);
+        }
     }
 
-    // Draw a card background with rounded corners and subtle shadow
+    // Draw enhanced card background with better shadows and rounded corners
     const cardX = 40, cardY = 40, cardW = cardWidth - 80, cardH = cardHeight - 80;
-    ctx2.fillStyle = theme === 'dark' ? '#0f1720' : '#ffffff';
-    const r = 20;
+    const r = preset === 'modern' ? 12 : preset === 'elegant' ? 24 : 16;
+
+    // Card shadow with multiple layers for depth
+    ctx2.save();
+    ctx2.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx2.shadowBlur = preset === 'elegant' ? 25 : 15;
+    ctx2.shadowOffsetX = preset === 'elegant' ? 8 : 4;
+    ctx2.shadowOffsetY = preset === 'elegant' ? 8 : 4;
+
+    // Main card background
+    ctx2.fillStyle = cardBg;
     ctx2.beginPath();
     ctx2.moveTo(cardX + r, cardY);
     ctx2.lineTo(cardX + cardW - r, cardY);
@@ -202,26 +268,52 @@ function generatePoemCanvas(poem, opts = {}) {
     ctx2.lineTo(cardX, cardY + r);
     ctx2.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
     ctx2.closePath();
-    // shadow
-    ctx2.fillStyle = theme === 'dark' ? '#08111a' : '#ffffff';
     ctx2.fill();
+    ctx2.restore();
 
-    // content area start
-    let cursorY = cardY + 36;
+    // Add decorative border for elegant preset
+    if (preset === 'elegant') {
+        ctx2.strokeStyle = accentColor;
+        ctx2.lineWidth = 2;
+        ctx2.stroke();
+    }
 
-    // Title
+    // content area start with better spacing
+    let cursorY = cardY + padding * 0.6;
+
+    // Enhanced title with better typography
     ctx2.fillStyle = textColor;
-    ctx2.font = `bold ${titleFontSize}px 'Playfair Display', Georgia, serif`;
+    ctx2.font = `bold ${titleFontSize}px ${titleFontFamily}`;
     ctx2.textBaseline = 'top';
-    titleLines.forEach(line => {
-        ctx2.fillText(line, cardX + padding, cursorY);
-        cursorY += Math.round(titleFontSize * 1.25);
-    });
-    cursorY += Math.round(bodyFontSize * 0.8);
 
-    // Body text
+    // Add subtle text shadow for elegance
+    if (preset === 'elegant' || preset === 'vintage') {
+        ctx2.shadowColor = 'rgba(0,0,0,0.1)';
+        ctx2.shadowBlur = 2;
+        ctx2.shadowOffsetX = 1;
+        ctx2.shadowOffsetY = 1;
+    }
+
+    titleLines.forEach((line, index) => {
+        ctx2.fillText(line, cardX + padding, cursorY);
+        cursorY += Math.round(titleFontSize * 1.4);
+    });
+
+    // Reset shadow
+    ctx2.shadowColor = 'transparent';
+    ctx2.shadowBlur = 0;
+    ctx2.shadowOffsetX = 0;
+    ctx2.shadowOffsetY = 0;
+
+    cursorY += Math.round(bodyFontSize * 1.2);
+
+    // Enhanced body text with better spacing
     ctx2.fillStyle = textColor;
-    ctx2.font = `${bodyFontSize}px 'Source Sans Pro', Arial, sans-serif`;
+    ctx2.font = `${bodyFontSize}px ${bodyFontFamily}`;
+
+    // Add subtle letter spacing for better readability
+    ctx2.letterSpacing = preset === 'modern' ? '0.5px' : '0px';
+
     bodyLines.forEach(line => {
         if (line === null) {
             cursorY += paragraphGap;
@@ -231,10 +323,28 @@ function generatePoemCanvas(poem, opts = {}) {
         }
     });
 
-    // Footer: site name
+    // Enhanced footer with better typography and decorative elements
     ctx2.fillStyle = metaColor;
-    ctx2.font = `16px sans-serif`;
-    ctx2.fillText("PG'sPoeticPen — PG Poetry", cardX + padding, cardY + cardH - 50);
+    ctx2.font = `16px ${bodyFontFamily}`;
+
+    // Add decorative line above footer
+    if (preset === 'elegant' || preset === 'vintage') {
+        ctx2.strokeStyle = accentColor;
+        ctx2.lineWidth = 1;
+        ctx2.beginPath();
+        ctx2.moveTo(cardX + padding, cardY + cardH - 70);
+        ctx2.lineTo(cardX + cardW - padding, cardY + cardH - 70);
+        ctx2.stroke();
+    }
+
+    ctx2.fillText("PG'sPoeticPen — PG Poetry", cardX + padding, cardY + cardH - 45);
+
+    // Add small decorative element for elegant preset
+    if (preset === 'elegant') {
+        ctx2.fillStyle = accentColor;
+        ctx2.font = '12px serif';
+        ctx2.fillText('❦', cardX + cardW - padding - 20, cardY + cardH - 45);
+    }
 
     return new Promise((resolve) => {
         canvas.toBlob((blob) => {
@@ -626,9 +736,11 @@ function createImagePreviewModal() {
             </div>
             <div class="ip-controls">
                 <label>Theme: <select id="ip-theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+                <label class="ip-presets-label">Preset: <select id="ip-preset"><option value="classic">Classic</option><option value="modern">Modern</option><option value="compact">Compact</option><option value="elegant">Elegant</option><option value="vintage">Vintage</option></select></label>
                 <button id="ip-generate" class="btn btn-primary">Generate</button>
                 <button id="ip-download" class="btn" disabled>Download PNG</button>
             </div>
+            <div class="ip-samples" id="ip-samples" aria-hidden="false" style="padding:12px 16px; display:flex; gap:8px; overflow:auto;"></div>
             <div class="ip-preview" id="ip-preview"></div>
         </div>
     `;
@@ -637,14 +749,62 @@ function createImagePreviewModal() {
     // Close handlers
     modal.querySelector('#ip-close').addEventListener('click', () => { modal.classList.remove('visible'); });
     modal.querySelector('.ip-overlay').addEventListener('click', () => { modal.classList.remove('visible'); });
+
+    // samples generation helper
+    async function generateSamples(poem) {
+        try {
+            const samplesContainer = modal.querySelector('#ip-samples');
+            if (!samplesContainer) return;
+            samplesContainer.innerHTML = '';
+            const presets = ['classic','modern','compact','elegant','vintage'];
+            for (const p of presets) {
+                const cell = document.createElement('div');
+                cell.className = 'ip-sample';
+                cell.dataset.preset = p;
+                cell.innerHTML = '<div class="ip-sample-box" style="width:150px;height:100px;display:flex;align-items:center;justify-content:center;background:#f6f7fb;border-radius:6px;overflow:hidden;"></div><div style="font-size:12px;text-align:center;margin-top:6px;">'+p.charAt(0).toUpperCase()+p.slice(1)+'</div>';
+                samplesContainer.appendChild(cell);
+                // generate small thumbnail asynchronously
+                (async () => {
+                    try {
+                        const { blob, canvas } = await generatePoemCanvas(poem, { theme: 'light', preset: p, scale: 1 });
+                        const thumbUrl = canvas.toDataURL('image/png');
+                        const img = document.createElement('img'); img.src = thumbUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+                        const box = cell.querySelector('.ip-sample-box'); box.innerHTML = ''; box.appendChild(img);
+                    } catch (e) {
+                        // ignore sample failure
+                    }
+                })();
+            }
+            // click handler to pick preset
+            samplesContainer.addEventListener('click', function(ev){
+                const cell = ev.target.closest && ev.target.closest('.ip-sample');
+                if (!cell) return;
+                const p = cell.dataset.preset;
+                const sel = modal.querySelector('#ip-preset'); if (sel) sel.value = p;
+            });
+        } catch (e) { /* ignore */ }
+    }
 }
 
 async function openImagePreviewModal(poem) {
     createImagePreviewModal();
-    const modal = document.getElementById('image-preview-modal');
+    let modal = document.getElementById('image-preview-modal');
+    // defensive: if not present (race), recreate
+    if (!modal) { createImagePreviewModal(); modal = document.getElementById('image-preview-modal'); }
     console.log('[pgp] openImagePreviewModal called', { title: poem && poem.title });
     const preview = document.getElementById('ip-preview');
     const themeSel = document.getElementById('ip-theme');
+    // typography preset selector (injected if missing)
+    let presetSel = document.getElementById('ip-preset');
+    if (!presetSel) {
+        const controls = modal.querySelector('.ip-controls');
+        if (controls) {
+            const node = document.createElement('label');
+            node.innerHTML = 'Preset: <select id="ip-preset"><option value="classic">Classic</option><option value="modern">Modern</option><option value="compact">Compact</option></select>';
+            controls.insertBefore(node, controls.querySelector('#ip-generate'));
+            presetSel = document.getElementById('ip-preset');
+        }
+    }
     const genBtn = document.getElementById('ip-generate');
     const dlBtn = document.getElementById('ip-download');
 
@@ -652,26 +812,14 @@ async function openImagePreviewModal(poem) {
     // lock body scroll to prevent layout shift
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    // Diagnostic: force visible inline styles in case CSS prevents display
+    // rely on CSS for visual layout; still ensure modal is visible
     try {
-    modal.style.pointerEvents = 'auto';
-    modal.style.opacity = '1';
-    modal.style.display = 'flex';
-    // Ensure modal is positioned as an overlay even if stylesheet wasn't applied
-    modal.style.position = 'fixed';
-    modal.style.left = '0';
-    modal.style.top = '0';
-    modal.style.right = '0';
-    modal.style.bottom = '0';
-    modal.style.inset = '0';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-    modal.setAttribute('aria-hidden', 'false');
-    modal.classList.add('debug');
-        console.log('[pgp] modal forced visible (inline styles applied)');
-        const cs = window.getComputedStyle(modal);
-        console.log('[pgp] modal computed styles', { display: cs.display, visibility: cs.visibility, opacity: cs.opacity, zIndex: cs.zIndex });
-    } catch (e) { console.warn('[pgp] forcing modal styles failed', e); }
+        modal.style.pointerEvents = 'auto';
+        modal.style.opacity = '1';
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        console.log('[pgp] modal shown');
+    } catch (e) { console.warn('[pgp] ensuring modal visible failed', e); }
 
     let lastUrl = null;
     const keyHandler = (e) => { if (e.key === 'Escape') closeModal(); };
@@ -693,33 +841,25 @@ async function openImagePreviewModal(poem) {
     // restore body overflow and inline styles
     try { document.body.style.overflow = prevOverflow || ''; } catch (e) { /* ignore */ }
     try {
-    modal.style.display = '';
-    modal.style.pointerEvents = '';
-    modal.style.opacity = '';
-    // restore any position we forced
-    modal.style.position = '';
-    modal.style.left = '';
-    modal.style.top = '';
-    modal.style.right = '';
-    modal.style.bottom = '';
-    modal.style.inset = '';
-    modal.style.alignItems = '';
-    modal.style.justifyContent = '';
-    modal.classList.remove('debug');
-    modal.removeAttribute('aria-hidden');
+        modal.style.display = '';
+        modal.style.pointerEvents = '';
+        modal.style.opacity = '';
+        modal.removeAttribute('aria-hidden');
     } catch (e) { /* ignore */ }
+    
     }
 
     async function generate() {
         genBtn.disabled = true; dlBtn.disabled = true; dlBtn.removeAttribute('data-url');
-        preview.innerHTML = '<div class="ip-loading">Generating…</div>';
+        preview.innerHTML = '<div class="ip-loading"><div class="spinner" aria-hidden="true"></div><div class="loading-text">Generating…</div></div>';
         try {
             // revoke previous
             cleanupUrl();
             const scale = 3; // higher default for crisper images
             const theme = themeSel.value || 'light';
+            const preset = (presetSel && presetSel.value) ? presetSel.value : 'classic';
             const watermark = false;
-            const { blob, canvas } = await generatePoemCanvas(poem, { theme, watermark, scale });
+            const { blob, canvas } = await generatePoemCanvas(poem, { theme, watermark, scale, preset });
             let url = null;
             let usedDataUrl = false;
             try {
@@ -765,6 +905,9 @@ async function openImagePreviewModal(poem) {
     modal.querySelector('.ip-overlay').addEventListener('click', closeModal);
     document.addEventListener('keydown', keyHandler);
 
+    // ensure modal is focused for keyboard close and visible in DOM
+    try { modal.focus(); } catch (e) { /* ignore */ }
+    await new Promise(res => requestAnimationFrame(res));
     // Trigger initial generation
     await generate();
 }
