@@ -90,6 +90,159 @@ function formatDate(dateString) {
     }
 }
 
+// --- Image generation helpers (prototype client-only) ---
+function wrapText(ctx, text, maxWidth) {
+    const words = text.split(/\s+/);
+    const lines = [];
+    let line = '';
+    for (let n = 0; n < words.length; n++) {
+        const testLine = line ? (line + ' ' + words[n]) : words[n];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && line) {
+            lines.push(line);
+            line = words[n];
+        } else {
+            line = testLine;
+        }
+    }
+    if (line) lines.push(line);
+    return lines;
+}
+
+function generatePoemCanvas(poem, opts = {}) {
+    // opts: { theme: 'light'|'dark' }
+    const theme = opts.theme || 'light';
+    // No watermark by default for clean export
+    const watermark = false;
+    // Use higher default scale for crisper images
+    const scale = opts.scale || 3;
+    // improved base card size and paddings
+    const cardWidth = 1400; // px
+    const padding = 100;
+    const titleFontSize = 56;
+    const bodyFontSize = 28;
+
+    // Create a temporary canvas to measure and draw
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    // use scaled resolution for retina-quality
+    canvas.width = cardWidth * scale;
+    // we will compute height dynamically
+    ctx.scale(scale, scale);
+
+    // Background
+    const bg = theme === 'dark' ? '#0f1720' : '#ffffff';
+    const textColor = theme === 'dark' ? '#e6eef8' : '#1f2937';
+    const metaColor = theme === 'dark' ? '#9fb6d6' : '#6b7280';
+
+    // Title measurements (prefer Playfair/serif stack)
+    ctx.font = `bold ${titleFontSize}px 'Playfair Display', Georgia, serif`;
+    const titleLines = wrapText(ctx, poem.title || '', cardWidth - padding * 2);
+
+    // body paragraphs with improved typography (sans-serif stack)
+    ctx.font = `${bodyFontSize}px 'Source Sans Pro', Arial, sans-serif`;
+    const paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => p.replace(/\n/g, ' ').trim());
+    const bodyLines = [];
+    paragraphs.forEach((p, idx) => {
+        const lines = wrapText(ctx, p, cardWidth - padding * 2);
+        bodyLines.push(...lines);
+        if (idx < paragraphs.length - 1) {
+            bodyLines.push(null); // paragraph separator marker
+        }
+    });
+
+    // Compute height
+    const lineHeight = Math.round(bodyFontSize * 1.7);
+    const paragraphGap = Math.round(bodyFontSize * 0.9);
+    const titleHeight = titleLines.length * Math.round(titleFontSize * 1.25);
+    let bodyHeight = 0;
+    bodyLines.forEach((ln) => { bodyHeight += (ln === null ? paragraphGap : lineHeight); });
+    const footerHeight = 90;
+    const cardHeight = Math.ceil(padding * 2 + titleHeight + 32 + bodyHeight + footerHeight);
+
+    // resize canvas to final height (account for scale)
+    canvas.height = cardHeight * scale;
+    // reset and scale again
+    const ctx2 = canvas.getContext('2d');
+    ctx2.scale(scale, scale);
+
+    // Fill background (optionally gradient)
+    if (theme === 'dark') {
+        ctx2.fillStyle = '#0b1220';
+        ctx2.fillRect(0, 0, cardWidth, cardHeight);
+        // subtle top gradient
+        const g = ctx2.createLinearGradient(0, 0, 0, cardHeight);
+        g.addColorStop(0, 'rgba(255,255,255,0.02)');
+        g.addColorStop(1, 'rgba(0,0,0,0.04)');
+        ctx2.fillStyle = g;
+        ctx2.fillRect(0, 0, cardWidth, cardHeight);
+    } else {
+        // light card with subtle radial vignette
+        ctx2.fillStyle = '#fff';
+        ctx2.fillRect(0, 0, cardWidth, cardHeight);
+        const g = ctx2.createLinearGradient(0, 0, 0, cardHeight);
+        g.addColorStop(0, 'rgba(231, 76, 60, 0.02)');
+        g.addColorStop(1, 'rgba(102,126,234,0.02)');
+        ctx2.fillStyle = g;
+        ctx2.fillRect(0, 0, cardWidth, cardHeight);
+    }
+
+    // Draw a card background with rounded corners and subtle shadow
+    const cardX = 40, cardY = 40, cardW = cardWidth - 80, cardH = cardHeight - 80;
+    ctx2.fillStyle = theme === 'dark' ? '#0f1720' : '#ffffff';
+    const r = 20;
+    ctx2.beginPath();
+    ctx2.moveTo(cardX + r, cardY);
+    ctx2.lineTo(cardX + cardW - r, cardY);
+    ctx2.quadraticCurveTo(cardX + cardW, cardY, cardX + cardW, cardY + r);
+    ctx2.lineTo(cardX + cardW, cardY + cardH - r);
+    ctx2.quadraticCurveTo(cardX + cardW, cardY + cardH, cardX + cardW - r, cardY + cardH);
+    ctx2.lineTo(cardX + r, cardY + cardH);
+    ctx2.quadraticCurveTo(cardX, cardY + cardH, cardX, cardY + cardH - r);
+    ctx2.lineTo(cardX, cardY + r);
+    ctx2.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
+    ctx2.closePath();
+    // shadow
+    ctx2.fillStyle = theme === 'dark' ? '#08111a' : '#ffffff';
+    ctx2.fill();
+
+    // content area start
+    let cursorY = cardY + 36;
+
+    // Title
+    ctx2.fillStyle = textColor;
+    ctx2.font = `bold ${titleFontSize}px 'Playfair Display', Georgia, serif`;
+    ctx2.textBaseline = 'top';
+    titleLines.forEach(line => {
+        ctx2.fillText(line, cardX + padding, cursorY);
+        cursorY += Math.round(titleFontSize * 1.25);
+    });
+    cursorY += Math.round(bodyFontSize * 0.8);
+
+    // Body text
+    ctx2.fillStyle = textColor;
+    ctx2.font = `${bodyFontSize}px 'Source Sans Pro', Arial, sans-serif`;
+    bodyLines.forEach(line => {
+        if (line === null) {
+            cursorY += paragraphGap;
+        } else {
+            ctx2.fillText(line, cardX + padding, cursorY);
+            cursorY += lineHeight;
+        }
+    });
+
+    // Footer: site name
+    ctx2.fillStyle = metaColor;
+    ctx2.font = `16px sans-serif`;
+    ctx2.fillText("PG'sPoeticPen — PG Poetry", cardX + padding, cardY + cardH - 50);
+
+    return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+            resolve({ blob, canvas });
+        }, 'image/png');
+    });
+}
+
 // Calculate reading statistics
 function calculateReadingStats(content) {
     try {
@@ -123,7 +276,9 @@ async function loadPoem() {
         
         const poem = await fetchWithErrorHandling(`${API_BASE}/poems/${slug}`);
         
-        log(`Poem loaded successfully: ${poem.title}`, 'success');
+    log(`Poem loaded successfully: ${poem.title}`, 'success');
+    // expose poem data globally for delegated handlers (safe for client-only use)
+    try { window.__CURRENT_POEM__ = poem; } catch (e) { /* ignore in restricted contexts */ }
         
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
         const { words, minutes } = calculateReadingStats(poem.content);
@@ -358,57 +513,10 @@ function setupPoemInteractions(poem) {
 
         const shareImage = document.getElementById('share-image');
         if (shareImage) {
-            shareImage.addEventListener('click', async function() {
+        shareImage.addEventListener('click', async function() {
                 try {
-                    // Render poem text into a simple canvas image
-                    const lines = (poem.content || '').split(/\n/);
-                    const canvas = document.createElement('canvas');
-                    const width = 1200;
-                    const lineHeight = 36;
-                    const padding = 60;
-                    const height = padding * 2 + Math.min(800, lines.length * lineHeight);
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    // bg
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0,0,width,height);
-                    // title
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.font = 'bold 36px serif';
-                    ctx.fillText(poem.title, padding, padding);
-                    // body
-                    ctx.fillStyle = '#444';
-                    ctx.font = '20px serif';
-                    let y = padding + 48;
-                    ctx.textBaseline = 'top';
-                    for (let i=0;i<lines.length && y < height - padding; i++) {
-                        const line = lines[i];
-                        // simple wrap
-                        ctx.fillText(line, padding, y);
-                        y += lineHeight;
-                    }
-                    // convert to blob
-                    canvas.toBlob(async function(blob) {
-                        if (!blob) return showNotification('Could not generate image', 'error');
-                        const file = new File([blob], `${(poem.title || 'poem').replace(/[^a-z0-9]/gi,'_')}.png`, { type: 'image/png' });
-                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                            try {
-                                await navigator.share({ files: [file], title: poem.title, text: poem.title });
-                                showNotification('Image shared', 'success');
-                            } catch (e) {
-                                showNotification('Share failed', 'error');
-                            }
-                        } else {
-                            // download fallback
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url; a.download = `${(poem.title || 'poem').replace(/[^a-z0-9]/gi,'_')}.png`;
-                            document.body.appendChild(a); a.click(); a.remove();
-                            URL.revokeObjectURL(url);
-                            showNotification('Image downloaded', 'success');
-                        }
-                    });
+            // Open preview modal and generate image with controls
+            openImagePreviewModal(poem);
                 } catch (e) {
                     console.error('share-image error', e);
                     showNotification('Could not create image', 'error');
@@ -448,6 +556,37 @@ function setupPoemInteractions(poem) {
             document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { const menu = document.getElementById('share-menu'); if (menu) menu.classList.remove('visible'); } });
 }
 
+// Ensure delegated handler for share-image exists (prevents cases where element wasn't present)
+if (!window.__pgp_share_image_delegated) {
+    window.__pgp_share_image_delegated = true;
+    document.addEventListener('click', function(ev) {
+        try {
+                const target = ev.target.closest && ev.target.closest('.share-option.image, #share-image');
+            if (!target) return;
+            ev.preventDefault();
+                console.log('[pgp] delegated share-image click detected', { target: String(target && target.id) });
+            // find poem data from global scope or inline dataset
+            const poem = window.__CURRENT_POEM__ || (window.__poem_data__ ? window.__poem_data__ : null);
+            if (!poem) {
+                // try to parse from DOM if embedded
+                const container = document.getElementById('poem-container');
+                if (container && container.dataset && container.dataset.poem) {
+                    try { window.__CURRENT_POEM__ = JSON.parse(container.dataset.poem); } catch (e) { /* ignore */ }
+                }
+            }
+            const used = window.__CURRENT_POEM__ || window.__poem_data__;
+            if (!used) {
+                showNotification && showNotification('Poem data not available', 'warning');
+                return;
+            }
+            openImagePreviewModal(used);
+        } catch (e) {
+            console.error('delegated share-image handler error', e);
+            showNotification && showNotification('Could not open image preview', 'error');
+        }
+    });
+}
+
 // Setup scroll to top functionality
 function setupScrollToTop() {
     try {
@@ -470,6 +609,164 @@ function setupScrollToTop() {
     } catch (error) {
         log(`Error setting up scroll to top: ${error.message}`, 'error');
     }
+}
+
+// --- Image preview modal ---
+function createImagePreviewModal() {
+    if (document.getElementById('image-preview-modal')) return;
+    const modal = document.createElement('div');
+    modal.id = 'image-preview-modal';
+    modal.className = 'image-preview-modal';
+    modal.innerHTML = `
+        <div class="ip-overlay"></div>
+        <div class="ip-dialog">
+            <div class="ip-header">
+                <h3>Preview Image</h3>
+                <button id="ip-close" class="ip-close">×</button>
+            </div>
+            <div class="ip-controls">
+                <label>Theme: <select id="ip-theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+                <button id="ip-generate" class="btn btn-primary">Generate</button>
+                <button id="ip-download" class="btn" disabled>Download PNG</button>
+            </div>
+            <div class="ip-preview" id="ip-preview"></div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close handlers
+    modal.querySelector('#ip-close').addEventListener('click', () => { modal.classList.remove('visible'); });
+    modal.querySelector('.ip-overlay').addEventListener('click', () => { modal.classList.remove('visible'); });
+}
+
+async function openImagePreviewModal(poem) {
+    createImagePreviewModal();
+    const modal = document.getElementById('image-preview-modal');
+    console.log('[pgp] openImagePreviewModal called', { title: poem && poem.title });
+    const preview = document.getElementById('ip-preview');
+    const themeSel = document.getElementById('ip-theme');
+    const genBtn = document.getElementById('ip-generate');
+    const dlBtn = document.getElementById('ip-download');
+
+    modal.classList.add('visible');
+    // lock body scroll to prevent layout shift
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    // Diagnostic: force visible inline styles in case CSS prevents display
+    try {
+    modal.style.pointerEvents = 'auto';
+    modal.style.opacity = '1';
+    modal.style.display = 'flex';
+    // Ensure modal is positioned as an overlay even if stylesheet wasn't applied
+    modal.style.position = 'fixed';
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.right = '0';
+    modal.style.bottom = '0';
+    modal.style.inset = '0';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('debug');
+        console.log('[pgp] modal forced visible (inline styles applied)');
+        const cs = window.getComputedStyle(modal);
+        console.log('[pgp] modal computed styles', { display: cs.display, visibility: cs.visibility, opacity: cs.opacity, zIndex: cs.zIndex });
+    } catch (e) { console.warn('[pgp] forcing modal styles failed', e); }
+
+    let lastUrl = null;
+    const keyHandler = (e) => { if (e.key === 'Escape') closeModal(); };
+
+    function cleanupUrl() {
+        if (lastUrl) {
+            try { URL.revokeObjectURL(lastUrl); } catch (e) { /* ignore */ }
+            lastUrl = null;
+        }
+    }
+
+    function closeModal() {
+        cleanupUrl();
+        modal.classList.remove('visible');
+        preview.innerHTML = '';
+        dlBtn.disabled = true;
+        genBtn.disabled = false;
+        document.removeEventListener('keydown', keyHandler);
+    // restore body overflow and inline styles
+    try { document.body.style.overflow = prevOverflow || ''; } catch (e) { /* ignore */ }
+    try {
+    modal.style.display = '';
+    modal.style.pointerEvents = '';
+    modal.style.opacity = '';
+    // restore any position we forced
+    modal.style.position = '';
+    modal.style.left = '';
+    modal.style.top = '';
+    modal.style.right = '';
+    modal.style.bottom = '';
+    modal.style.inset = '';
+    modal.style.alignItems = '';
+    modal.style.justifyContent = '';
+    modal.classList.remove('debug');
+    modal.removeAttribute('aria-hidden');
+    } catch (e) { /* ignore */ }
+    }
+
+    async function generate() {
+        genBtn.disabled = true; dlBtn.disabled = true; dlBtn.removeAttribute('data-url');
+        preview.innerHTML = '<div class="ip-loading">Generating…</div>';
+        try {
+            // revoke previous
+            cleanupUrl();
+            const scale = 3; // higher default for crisper images
+            const theme = themeSel.value || 'light';
+            const watermark = false;
+            const { blob, canvas } = await generatePoemCanvas(poem, { theme, watermark, scale });
+            let url = null;
+            let usedDataUrl = false;
+            try {
+                // try blob URL first
+                url = URL.createObjectURL(blob);
+                lastUrl = url;
+            } catch (cspErr) {
+                // CSP may disallow blob: in img-src — fallback to data URL
+                try {
+                    url = canvas.toDataURL('image/png');
+                    usedDataUrl = true;
+                    console.warn('[pgp] Falling back to data URL for image preview due to CSP', cspErr);
+                } catch (dErr) {
+                    console.error('[pgp] toDataURL also failed', dErr);
+                    throw dErr;
+                }
+            }
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.maxWidth = '100%';
+            preview.appendChild(img);
+            dlBtn.disabled = false;
+            dlBtn.onclick = () => {
+                const a = document.createElement('a');
+                // For data URLs we can set href directly; for blob URLs also works
+                a.href = url; a.download = `${(poem.title || 'poem').replace(/[^a-z0-9]/gi,'_')}.png`;
+                document.body.appendChild(a); a.click(); a.remove();
+                // revoke blob URLs after download initiation
+                if (!usedDataUrl) cleanupUrl();
+            };
+        } catch (e) {
+            preview.innerHTML = '<div class="ip-error">Failed to generate image</div>';
+        } finally {
+            genBtn.disabled = false;
+        }
+    }
+
+    // wire controls
+    genBtn.onclick = generate;
+    // ensure close removes Url and listeners
+    modal.querySelector('#ip-close').addEventListener('click', closeModal);
+    modal.querySelector('.ip-overlay').addEventListener('click', closeModal);
+    document.addEventListener('keydown', keyHandler);
+
+    // Trigger initial generation
+    await generate();
 }
 
 // Theme persistence (standardized)

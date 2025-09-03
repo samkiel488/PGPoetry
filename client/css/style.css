@@ -85,6 +85,23 @@ body.dark .theme-toggle {
 
 .loading-text {
     margin-top: 0.5rem;
+.image-preview-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity .18s ease; z-index: 20000; }
+.image-preview-modal.visible { pointer-events: auto; opacity: 1; }
+.image-preview-modal .ip-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.image-preview-modal .ip-dialog { position: relative; width: min(900px, 95%); max-height: 90vh; background: var(--card-bg, #fff); color: var(--text, #111); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); overflow: hidden; display: flex; flex-direction: column; pointer-events: auto; }
+/* DEBUG: make dialog visually obvious */
+.image-preview-modal.debug .ip-dialog { background: #fff2cc !important; padding: 28px !important; border: 3px solid #ff9900 !important; box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important; }
+.image-preview-modal .ip-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid rgba(0,0,0,0.06); }
+.image-preview-modal .ip-header h3 { margin:0; font-size:1rem; }
+.image-preview-modal .ip-close { background:transparent; border:0; font-size:20px; line-height:1; cursor:pointer; }
+.image-preview-modal .ip-controls { display:flex; gap:8px; align-items:center; padding:12px 16px; flex-wrap:wrap; border-bottom:1px solid rgba(0,0,0,0.04); }
+.image-preview-modal .ip-controls label { font-size:0.9rem; display:flex; gap:6px; align-items:center; }
+.image-preview-modal .ip-controls select, .image-preview-modal .ip-controls input[type="checkbox"] { margin-left:6px; }
+.image-preview-modal .ip-preview { padding:16px; overflow:auto; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01)); min-height:320px; }
+.image-preview-modal .ip-loading, .image-preview-modal .ip-error { color: #666; }
+
+/* Dark theme tweaks */
+body.dark .image-preview-modal .ip-dialog { background: #0f1720; color: #e6eef8; border: 1px solid rgba(255,255,255,0.04); }
     color: #888;
     text-align: center;
 }
