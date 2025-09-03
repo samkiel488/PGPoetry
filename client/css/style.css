@@ -1,4 +1,4 @@
-/* 404 page styles */
+Mom. Choose and play. /* 404 page styles */
 body.notfound {
     text-align: center;
     padding: 5rem 1rem;
@@ -701,8 +701,14 @@ body.dark .user-email { color: #9aa6b2; }
 .inline-like.liked { background: linear-gradient(90deg,#ff7b7b,#ff5252); color: #fff; border-color: transparent; }
 
 /* Share menu for single poem */
-.share-menu { position: absolute; right: 1.25rem; top: 1.25rem; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); padding: 0.5rem; display: none; z-index: 50; }
-.share-menu.visible { display: block; }
+.share-menu { position: absolute; right: 1.25rem; top: 1.25rem; background: #fff; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); padding: 0.5rem; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); pointer-events: none; z-index: 9999; transition: opacity 220ms ease, transform 220ms ease, visibility 220ms; }
+.share-menu.visible { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
+.share-menu.anim-open { transform-origin: top right; }
+
+@keyframes shareOpen {
+    0% { transform: translateY(-6px) scale(0.98); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
 .share-menu .share-option { display:flex; align-items:center; gap:0.6rem; padding:0.4rem 0.6rem; border-radius:8px; cursor:pointer; }
 .share-menu .share-option:hover { background: #f2f6fb; }
 .share-menu .share-option .icon { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; }

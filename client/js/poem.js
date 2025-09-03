@@ -174,6 +174,7 @@ async function loadPoem() {
                 const menu = document.createElement('div');
                 menu.className = 'share-menu';
                 menu.id = 'share-menu';
+                menu.style.position = 'absolute';
                 menu.innerHTML = `
                     <div class="share-option copy" id="share-copy">
                         <span class="icon">📋</span><span>Copy poem & link</span>
@@ -185,7 +186,8 @@ async function loadPoem() {
                         <span class="icon">🔗</span><span>Share to social sites</span>
                     </div>
                 `;
-                container.appendChild(menu);
+                // append to body so positioning and offsetWidth are reliable
+                document.body.appendChild(menu);
             }
         } catch (e) {
             console.error('Error fetching share links', e);
@@ -287,36 +289,25 @@ function setupPoemInteractions(poem) {
         
         // Share button logic
         const shareBtn = document.getElementById('share-btn');
-        if (shareBtn) {
-            shareBtn.onclick = function(e) {
-                e.preventDefault();
-                log('Share button clicked', 'info');
-                
-                const url = window.location.href;
-                if (navigator.share) {
-                    navigator.share({
-                        title: poem.title,
-                        text: poem.content.substring(0, 100) + '...',
-                        url
-                    }).then(() => {
-                        log('Poem shared successfully', 'success');
-                        showNotification('Poem shared!', 'success');
-                    }).catch((error) => {
-                        log(`Share failed: ${error.message}`, 'error');
-                        showNotification('Share cancelled or failed.', 'warning');
-                    });
-                } else {
-                    // Toggle the share menu as fallback
+            if (shareBtn) {
+                shareBtn.onclick = function(e) {
+                    e.preventDefault();
+                    log('Share button clicked', 'info');
                     const menu = document.getElementById('share-menu');
-                    if (menu) {
-                        menu.classList.toggle('visible');
-                    } else {
-                        log('Share API not supported, showing fallback message', 'warn');
-                        showNotification('Share not supported on this device. Use the copy link button.', 'warning');
-                    }
-                }
-            };
-            log('Share button setup completed', 'success');
+                    if (!menu) return;
+                    // show first so we can measure width
+                    menu.classList.add('visible');
+                    menu.classList.add('anim-open');
+                    // Position menu near the button (simple approach)
+                    const rect = shareBtn.getBoundingClientRect();
+                    // compute left after visible so offsetWidth is accurate
+                    const left = Math.max(12, rect.left + window.scrollX + rect.width - menu.offsetWidth);
+                    menu.style.left = left + 'px';
+                    menu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+                    // remove anim class after animation ends
+                    setTimeout(() => menu.classList.remove('anim-open'), 320);
+                };
+                log('Share button setup completed', 'success');
         }
         
         // Copy link button logic
@@ -347,6 +338,8 @@ function setupPoemInteractions(poem) {
                     const text = `${poem.title}\n\n${poem.content}\n\nRead more: ${window.location.href}`;
                     navigator.clipboard.writeText(text).then(() => {
                         showNotification('Poem and link copied to clipboard', 'success');
+                            // auto-close menu
+                            const menu = document.getElementById('share-menu'); if (menu) { menu.classList.remove('visible'); }
                     }).catch(async () => {
                         // fallback to input
                         const fake = document.createElement('textarea');
@@ -443,6 +436,16 @@ function setupPoemInteractions(poem) {
     } catch (error) {
         log(`Error setting up poem interactions: ${error.message}`, 'error');
     }
+
+            // Close share menu when clicking outside or pressing Escape
+            document.addEventListener('click', function(ev){
+                const menu = document.getElementById('share-menu');
+                if (!menu || !menu.classList.contains('visible')) return;
+                if (ev.target.closest && ev.target.closest('.share-menu')) return; // inside
+                if (ev.target.closest && ev.target.closest('#share-btn')) return; // share button
+                menu.classList.remove('visible');
+            });
+            document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { const menu = document.getElementById('share-menu'); if (menu) menu.classList.remove('visible'); } });
 }
 
 // Setup scroll to top functionality
