@@ -118,7 +118,6 @@ async function generatePoemCanvas(poem, opts = {}) {
     // Use higher default scale for crisper images
     const scale = opts.scale || 3;
     // improved base card size and paddings
-    const cardWidth = 1400; // px
     let padding = 100;
 
     // Enhanced preset mapping with better typography
@@ -150,11 +149,39 @@ async function generatePoemCanvas(poem, opts = {}) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     // use scaled resolution for retina-quality
-    canvas.width = cardWidth * scale;
+    canvas.width = 800 * scale; // temporary width for measurement
     // we will compute height dynamically
     ctx.scale(scale, scale);
 
-    // Enhanced color schemes
+    // Wait for webfonts to be ready so measurements are accurate
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch (e) { /* ignore */ }
+
+    // Calculate dynamic width based on content
+    ctx.font = `bold ${titleFontSize}px ${titleFontFamily}`;
+    const titleLines = wrapText(ctx, poem.title || '', 2000); // large max width for measurement
+    const maxTitleWidth = Math.max(...titleLines.map(line => ctx.measureText(line).width));
+
+    ctx.font = `${bodyFontSize}px ${bodyFontFamily}`;
+    const paragraphs = (poem.content || '').trim().split(/\n\s*\n/);
+    let maxContentWidth = 0;
+    paragraphs.forEach((p) => {
+        const linesInParagraph = p.split('\n').map(line => line.trim());
+        linesInParagraph.forEach(line => {
+            const wrappedLines = wrapText(ctx, line, 2000); // large max width for measurement
+            wrappedLines.forEach(wrappedLine => {
+                const lineWidth = ctx.measureText(wrappedLine).width;
+                maxContentWidth = Math.max(maxContentWidth, lineWidth);
+            });
+        });
+    });
+
+    // Calculate dynamic card width with constraints
+    const contentWidth = Math.max(maxTitleWidth, maxContentWidth);
+    const minWidth = 600; // minimum width
+    const maxWidth = 1200; // maximum width to prevent overly wide images
+    const cardWidth = Math.max(minWidth, Math.min(maxWidth, contentWidth + (padding * 2) + 100)); // add padding and some buffer
+
+    // Enhanced color schemes with better preset distinctiveness
     let bgGradient, cardBg, textColor, metaColor, accentColor;
 
     if (theme === 'dark') {
@@ -182,6 +209,12 @@ async function generatePoemCanvas(poem, opts = {}) {
             textColor = '#1e293b';
             metaColor = '#64748b';
             accentColor = '#3b82f6';
+        } else if (preset === 'compact') {
+            bgGradient = ['#f0f9ff', '#bae6fd', '#7dd3fc'];
+            cardBg = '#ffffff';
+            textColor = '#0c4a6e';
+            metaColor = '#0369a1';
+            accentColor = '#0284c7';
         } else {
             bgGradient = ['#ffffff', '#f8fafc', '#f1f5f9'];
             cardBg = '#ffffff';
@@ -196,15 +229,18 @@ async function generatePoemCanvas(poem, opts = {}) {
 
     // Title measurements with enhanced typography
     ctx.font = `bold ${titleFontSize}px ${titleFontFamily}`;
-    const titleLines = wrapText(ctx, poem.title || '', cardWidth - padding * 2);
 
     // Body paragraphs with improved typography
     ctx.font = `${bodyFontSize}px ${bodyFontFamily}`;
-    const paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => p.replace(/\n/g, ' ').trim());
+    // Preserve line breaks within paragraphs by splitting on single newlines as well
     const bodyLines = [];
     paragraphs.forEach((p, idx) => {
-        const lines = wrapText(ctx, p, cardWidth - padding * 2);
-        bodyLines.push(...lines);
+        // Split paragraph by single newlines to preserve line breaks
+        const linesInParagraph = p.split('\n').map(line => line.trim());
+        linesInParagraph.forEach(line => {
+            const wrappedLines = wrapText(ctx, line, cardWidth - padding * 2);
+            bodyLines.push(...wrappedLines);
+        });
         if (idx < paragraphs.length - 1) {
             bodyLines.push(null); // paragraph separator marker
         }
@@ -278,6 +314,36 @@ async function generatePoemCanvas(poem, opts = {}) {
         ctx2.stroke();
     }
 
+    // Add unique visual elements for better preset distinctiveness
+    if (preset === 'modern') {
+        // Add subtle geometric pattern for modern preset
+        ctx2.save();
+        ctx2.strokeStyle = accentColor;
+        ctx2.lineWidth = 1;
+        ctx2.globalAlpha = 0.1;
+        for (let i = 0; i < cardWidth; i += 50) {
+            ctx2.beginPath();
+            ctx2.moveTo(i, cardY);
+            ctx2.lineTo(i, cardY + cardH);
+            ctx2.stroke();
+        }
+        ctx2.restore();
+    } else if (preset === 'compact') {
+        // Add corner accent for compact preset
+        ctx2.fillStyle = accentColor;
+        ctx2.beginPath();
+        ctx2.moveTo(cardX + cardW - 30, cardY);
+        ctx2.lineTo(cardX + cardW, cardY);
+        ctx2.lineTo(cardX + cardW, cardY + 30);
+        ctx2.closePath();
+        ctx2.fill();
+    } else if (preset === 'vintage') {
+        // Add vintage-style corner decoration
+        ctx2.fillStyle = accentColor;
+        ctx2.font = '24px serif';
+        ctx2.fillText('❦', cardX + cardW - 30, cardY + 30);
+    }
+
     // content area start with better spacing
     let cursorY = cardY + padding * 0.6;
 
@@ -337,7 +403,7 @@ async function generatePoemCanvas(poem, opts = {}) {
         ctx2.stroke();
     }
 
-    ctx2.fillText("PG'sPoeticPen — PG Poetry", cardX + padding, cardY + cardH - 45);
+    ctx2.fillText("PG Poetic Pen", cardX + padding, cardY + cardH - 45);
 
     // Add small decorative element for elegant preset
     if (preset === 'elegant') {
@@ -345,6 +411,16 @@ async function generatePoemCanvas(poem, opts = {}) {
         ctx2.font = '12px serif';
         ctx2.fillText('❦', cardX + cardW - padding - 20, cardY + cardH - 45);
     }
+
+    // Add favicon logo to bottom right corner
+    const logo = new Image();
+    logo.src = '/images/Favicon_PGPPen.png';
+    logo.onload = () => {
+        const logoSize = 64;
+        const logoX = cardX + cardW - padding - logoSize;
+        const logoY = cardY + cardH - padding - logoSize;
+        ctx2.drawImage(logo, logoX, logoY, logoSize, logoSize);
+    };
 
     return new Promise((resolve) => {
         canvas.toBlob((blob) => {
