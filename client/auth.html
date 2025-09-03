@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login / Register - PG'sPoeticPen</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+  <script src="/js/load-izitoast.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <div class="nav-brand">
+        <h1>PG'sPoeticPen</h1>
+        <p>Every verse, a priceless gift.</p>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/poems" class="nav-link">Poems</a></li>
+        <li><a href="/admin" class="nav-link">Admin</a></li>
+      </ul>
+      <div id="auth-nav" style="margin-left:auto"></div>
+    </nav>
+  </header>
+
+  <main class="main">
+    <section class="auth-page">
+      <div class="auth-container">
+        <div class="auth-tabs">
+          <button id="tab-login" class="tab active">Login</button>
+          <button id="tab-register" class="tab">Register</button>
+        </div>
+
+        <div id="login-form" class="auth-form">
+          <h2>Login</h2>
+          <label for="login-identifier">Email or Username</label>
+          <input id="login-identifier" type="text" autocomplete="username" />
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password" />
+          <button id="login-submit" class="btn btn-primary">Login</button>
+        </div>
+
+        <div id="register-form" class="auth-form hidden">
+          <h2>Register</h2>
+          <label for="reg-username">Username</label>
+          <input id="reg-username" type="text" autocomplete="username" />
+          <label for="reg-email">Email</label>
+          <input id="reg-email" type="email" autocomplete="email" />
+          <label for="reg-password">Password</label>
+          <input id="reg-password" type="password" autocomplete="new-password" />
+          <button id="register-submit" class="btn btn-primary">Create Account</button>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>PG'sPoeticPen</h3>
+        <p>Every verse, a priceless gift.</p>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="copyright-year">2025</span> PG'sPoeticPen. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/authNav.js" defer></script>
+  <script src="/js/auth.js" defer></script>
+</body>
+</html>

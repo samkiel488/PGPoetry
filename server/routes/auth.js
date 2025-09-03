@@ -1,7 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { login } = require('../controllers/authController');
+const { register, login, refresh, logout } = require('../controllers/authController');
 
+// Public: register a new user
+router.post('/register', register);
+
+// Public: login with username or email (identifier) + password
 router.post('/login', login);
 
-module.exports = router; 
+// Public: exchange refresh token for a new access token
+router.post('/refresh', refresh);
+
+// Public: invalidate refresh token (logout)
+router.post('/logout', logout);
+
+module.exports = router;

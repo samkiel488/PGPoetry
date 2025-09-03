@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - PG'sPoeticPen</title>
     <link rel="stylesheet" href="/admin/css/admin.css">
-    <link rel="stylesheet" href="/css/all.min.css">
+    <!-- Font Awesome (CDN only) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
-    <script src="/js/load-css-fallback.js" defer></script>
+    <script src="/admin/js/init-admin-theme.js" defer></script>
+    <script src="/admin/js/login.js" defer></script>
 </head>
 <body>
     <div class="login-container">
@@ -33,13 +35,16 @@
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
             
-            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="error-message" class="error-message"></div>
         </div>
+    </div>
+
+    <!-- Admin tools section -->
+    <div class="admin-tools">
+        <a href="/admin/upload-thumbnail.html" class="admin-tool-link">Upload Thumbnail</a>
     </div>
 
     <!-- Theme toggle positioned at bottom left -->
     <button class="theme-toggle" id="theme-toggle" title="Toggle Theme"><span id="theme-icon">🌙</span></button>
-    <script src="/admin/js/init-admin-theme.js" defer></script>
-    <script src="/admin/js/login.js" defer></script>
 </body>
 </html>

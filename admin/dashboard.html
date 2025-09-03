@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - PG'sPoeticPen</title>
     <link rel="stylesheet" href="/admin/css/admin.css">
-    <!-- Font Awesome: prefer local bundle, fallback loader will load latest CDN if needed -->
-    <link rel="stylesheet" href="/css/all.min.css">
+    <!-- Font Awesome (CDN only) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
     <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
-    <script src="/js/load-css-fallback.js" defer></script>
 </head>
 <body>
     <header class="admin-header">
@@ -47,7 +46,7 @@
     </main>
 
     <!-- New/Edit Poem Modal -->
-    <div id="poem-modal" class="modal" style="display: none;">
+    <div id="poem-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title">New Poem</h3>
@@ -69,7 +68,12 @@
                     <label for="poem-tags">Tags (comma-separated)</label>
                     <input type="text" id="poem-tags" name="tags" placeholder="life, nature, sad, happy">
                 </div>
-                
+
+                <div class="form-group">
+                    <label for="poem-thumbnail">Thumbnail (optional, JPG/PNG/WebP, max 2MB)</label>
+                    <input type="file" id="poem-thumbnail" name="thumbnail" accept="image/*">
+                </div>
+
                 <div class="form-group checkbox-group">
                     <label>
                         <input type="checkbox" id="poem-featured" name="featured">
@@ -78,22 +82,10 @@
                 </div>
                 
                 <div class="form-actions">
-                    <button type="button" id="preview-btn" class="btn btn-secondary">Preview</button>
                     <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Poem</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Preview Modal -->
-    <div id="preview-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Preview Poem</h3>
-                <button id="close-preview" class="close-btn">&times;</button>
-            </div>
-            <div id="preview-content"></div>
         </div>
     </div>
 

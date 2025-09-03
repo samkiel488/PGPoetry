@@ -157,6 +157,21 @@ async function loadPoem() {
         container.innerHTML = poemHTML;
         log('Poem HTML rendered successfully', 'success');
         
+        // Add share buttons (server provides share links via meta endpoint)
+        try {
+            const shareResp = await fetch(`${API_BASE}/poems/${poem.slug}`);
+            const shareData = await shareResp.json();
+            const shareLinks = {
+                twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`Just read this amazing piece on ${document.title.split(' — ')[1] || "PG'sPoeticPen"} ✨: ${poem.title}`)}`,
+                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+                whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(`Just read this amazing piece on ${document.title.split(' — ')[1] || "PG'sPoeticPen"} ✨: ${poem.title}`)}%20${encodeURIComponent(window.location.href)}`,
+                copy: window.location.href
+            };
+            renderShareButtons(shareLinks);
+        } catch (e) {
+            console.error('Error fetching share links', e);
+        }
+
         // Setup interactive elements
         setupPoemInteractions(poem);
         
@@ -172,6 +187,44 @@ async function loadPoem() {
         if (loading) {
             loading.style.display = 'none';
         }
+    }
+}
+
+// Render share buttons into #share-container
+function renderShareButtons(shareLinks) {
+    try {
+        const container = document.getElementById('share-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="share-buttons">
+                <a href="${shareLinks.twitter}" target="_blank" rel="noopener noreferrer" class="share-btn share-twitter">Share on X</a>
+                <a href="${shareLinks.facebook}" target="_blank" rel="noopener noreferrer" class="share-btn share-facebook">Share on Facebook</a>
+                <a href="${shareLinks.whatsapp}" target="_blank" rel="noopener noreferrer" class="share-btn share-whatsapp">Share on WhatsApp</a>
+                <button id="copy-link-btn" class="share-btn share-copy">Copy Link</button>
+            </div>
+        `;
+
+        const copyBtn = document.getElementById('copy-link-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareLinks.copy || window.location.href)
+                        .then(() => showNotification && showNotification('Link copied to clipboard', 'success'))
+                        .catch(() => showNotification && showNotification('Failed to copy link', 'error'));
+                } else {
+                    // fallback
+                    const fakeInput = document.createElement('input');
+                    fakeInput.value = shareLinks.copy || window.location.href;
+                    document.body.appendChild(fakeInput);
+                    fakeInput.select();
+                    try { document.execCommand('copy'); showNotification && showNotification('Link copied to clipboard', 'success'); } catch (e) { showNotification && showNotification('Failed to copy link', 'error'); }
+                    document.body.removeChild(fakeInput);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('renderShareButtons error', error);
     }
 }
 
@@ -349,3 +402,23 @@ document.addEventListener('DOMContentLoaded', function() {
         showNotification('Failed to initialize poem page', 'error');
     }
 });
+
+// After rendering poem HTML, fetch server-generated share links and render buttons
+(async function() {
+    try {
+        const apiBase = typeof API_BASE !== 'undefined' ? API_BASE : '';
+        const shareResp = await fetch(`${apiBase}/api/poems/${window.__POEM_SLUG__ || (window.location.pathname.split('/').pop())}/share-links`);
+        if (!shareResp.ok) throw new Error('Share links fetch failed');
+        const shareLinks = await shareResp.json();
+        renderShareButtons(shareLinks);
+    } catch (err) {
+        console.warn('Could not fetch server share links, using fallback', err);
+        const fallback = {
+            twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(document.title || 'Check this poem')}`,
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+            whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(document.title || 'Check this poem')}%20${encodeURIComponent(window.location.href)}`,
+            copy: window.location.href
+        };
+        renderShareButtons(fallback);
+    }
+})();

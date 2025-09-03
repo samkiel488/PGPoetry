@@ -319,51 +319,21 @@ function closePoemModal() {
     }
 }
 
-// Preview mode for poem before submit
-function setupPreviewButton() {
-    try {
-        const previewBtn = document.getElementById('preview-btn');
-        const previewModal = document.getElementById('preview-modal');
-        const previewContent = document.getElementById('preview-content');
-        
-        if (previewBtn && previewModal && previewContent) {
-            previewBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                log('Preview button clicked', 'info');
-                
-                const formData = new FormData(poemForm);
-                const title = formData.get('title');
-                const content = formData.get('content');
-                const tags = formData.get('tags');
-                
-                previewContent.innerHTML = `<h2>${title}</h2><div>${content}</div><div>${tags}</div>`;
-                previewModal.classList.add('open');
-                 log('Preview modal opened', 'success');
-             });
-             
-            document.getElementById('close-preview').onclick = function() {
-                previewModal.classList.remove('open');
-                 log('Preview modal closed', 'info');
-             };
-            // Close when clicking outside modal-content
-            previewModal.addEventListener('click', function(e){
-                if (e.target === previewModal) {
-                    previewModal.classList.remove('open');
-                    log('Preview modal closed by outside click', 'info');
-                }
-            });
-            // Close on Esc
-            document.addEventListener('keydown', function(e){
-                if (e.key === 'Escape' && previewModal.classList.contains('open')) {
-                    previewModal.classList.remove('open');
-                }
-            });
-             
-             log('Preview button setup completed', 'success');
+// Add modal thumbnail preview handling
+const modalThumbnailInput = document.getElementById('poem-thumbnail');
+
+if (modalThumbnailInput) {
+    modalThumbnailInput.addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const allowed = ['image/jpeg','image/png','image/webp','image/gif'];
+        if (f.size > 2 * 1024 * 1024 || !allowed.includes(f.type)) {
+            showNotification('Invalid thumbnail. Use JPG/PNG/WebP/GIF under 2MB', 'error');
+            modalThumbnailInput.value = '';
+            return;
         }
-    } catch (error) {
-        log(`Error setting up preview button: ${error.message}`, 'error');
-    }
+        // no preview UI required per request; do nothing else
+    });
 }
 
 // Form submission handler
@@ -372,7 +342,7 @@ if (poemForm) {
         e.preventDefault();
 
         try {
-            log('Poem form submitted', 'info');
+            log('Poem form submitted (with possible thumbnail)', 'info');
             const formData = new FormData(poemForm);
             const poemData = {
                 title: formData.get('title'),
@@ -388,14 +358,39 @@ if (poemForm) {
                 : `${API_BASE}/poems`;
             const method = currentPoemId ? 'PUT' : 'POST';
 
-            await fetchWithErrorHandling(url, {
+            const saved = await fetchWithErrorHandling(url, {
                 method,
                 headers: getAuthHeaders(),
                 body: JSON.stringify(poemData)
             });
 
+            // If a thumbnail was selected, upload it using the dedicated endpoint
+            const thumbFile = modalThumbnailInput ? modalThumbnailInput.files[0] : null;
+            if (thumbFile) {
+                const uploadForm = new FormData();
+                uploadForm.append('thumbnail', thumbFile);
+                const targetId = currentPoemId ? currentPoemId : (saved && saved._id);
+                if (targetId) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${API_BASE}/poems/${targetId}/thumbnail`, true);
+                    xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('adminToken')}`);
+                    xhr.onload = function() {
+                        if (xhr.status >= 200 && xhr.status < 300) {
+                            showNotification('Thumbnail uploaded', 'success');
+                            // refresh list
+                            loadPoems();
+                        } else {
+                            showNotification('Thumbnail upload failed', 'error');
+                        }
+                    };
+                    xhr.onerror = function() { showNotification('Thumbnail upload error', 'error'); };
+                    xhr.send(uploadForm);
+                }
+            } else {
+                loadPoems();
+            }
+
             if (typeof closePoemModal === 'function') closePoemModal();
-            loadPoems();
 
             const message = currentPoemId ? 'Poem updated successfully!' : 'Poem created successfully!';
             log(message, 'success');
@@ -567,7 +562,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Setup all components
         setupEventListeners();
         setupThemeToggle();
-        setupPreviewButton();
         loadPoems();
         
         log('Dashboard initialization completed successfully', 'success');

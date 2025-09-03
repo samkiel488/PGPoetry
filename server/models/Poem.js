@@ -29,6 +29,17 @@ const poemSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // Optional image fields for SEO/social previews
+  thumbnail: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  featuredImage: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   likes: {
     type: Number,
     default: 0
@@ -49,4 +60,4 @@ poemSchema.pre('validate', function(next) {
   next();
 });
 
-module.exports = mongoose.model('Poem', poemSchema); 
+module.exports = mongoose.model('Poem', poemSchema);
