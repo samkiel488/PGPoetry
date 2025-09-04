@@ -218,6 +218,42 @@ body.dark .image-preview-modal .ip-dialog {
     transform: translateY(0);
 }
 
+/* Share buttons container */
+.share-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin: 1.5rem 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.share-buttons .share-btn {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.share-buttons .share-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.share-buttons .share-btn:active {
+    transform: translateY(0);
+}
+
 /* Poem actions container */
 .poem-actions {
     display: flex;
@@ -359,12 +395,16 @@ body.dark .header {
     color: #f1f1f1;
 }
 
-body.dark .nav-brand h1 {
+body.dark .nav-text h1 {
     color: #f1f1f1;
 }
 
-body.dark .nav-brand p {
+body.dark .nav-text p {
     color: #b2bec3;
+}
+
+body.dark .nav-logo {
+    border-color: #e74c3c;
 }
 
 body.dark .nav-link {
@@ -493,16 +533,36 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
 }
 
-.nav-brand h1 {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 0.2rem;
+.nav-brand {
+    display: flex;
+    align-items: center;
 }
 
-.nav-brand p {
+.nav-logo {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e74c3c;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.nav-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-text h1 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    font-weight: 700;
+    margin: 0;
+}
+
+.nav-text p {
     font-size: 0.9rem;
     color: #7f8c8d;
     font-style: italic;
+    margin: 0;
 }
 
 .nav-menu {
@@ -1237,26 +1297,58 @@ button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding:
 @media (max-width: 480px) {
   /* reduce overall article padding and margins for compact mobile view */
   .poem-article {
-    padding: 0.6rem 0.6rem;
-    margin: 0.6rem;
+    padding: 0.4rem 0.4rem;
+    margin: 0.4rem;
     max-width: 100%;
   }
 
-  .poem-header h1 { font-size: 1.05rem; }
-        }
+  .poem-header h1 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
 
-  /* Make action buttons more touch-friendly while keeping them visually prominent */
+  /* Reduce poem content font size and line height for better readability */
+  .poem-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 0 0.5rem;
+  }
+
+  /* Make poem-extra spans smaller width and more readable */
+  .poem-extra {
+    flex-direction: row;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    padding-top: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .poem-extra span {
+    background: #f0f0f0;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    display: inline-block;
+    font-size: 0.8rem;
+    min-width: auto;
+    flex-shrink: 0;
+  }
+
+  /* Make action buttons smaller and aligned center */
   .poem-actions {
     gap: 0.5rem;
     justify-content: center;
     flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
   }
   .poem-actions button {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.95rem;
-    min-width: 88px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    min-width: auto;
     border-radius: 8px;
-    box-shadow: 0 6px 14px rgba(16,24,40,0.06);
+    box-shadow: 0 6px 14px rgba(16,24,40,0.08);
+    flex: 0 0 auto;
   }
 
   /* Like button visuals for mobile and desktop: bright gradient when liked */
@@ -1266,6 +1358,7 @@ button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding:
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    justify-content: center;
   }
   .like-btn .like-count { font-weight: 700; }
   .like-btn.liked {
@@ -1275,6 +1368,14 @@ button, .btn, .like-btn, .copy-link-btn, .share-btn { min-height: 40px; padding:
 
   /* Keep buttons accessible on focus */
   .poem-actions button:focus { outline: 3px solid rgba(102,126,234,0.18); outline-offset: 2px; }
+
+  /* Adjust share menu positioning to avoid overflow on mobile */
+  .share-menu {
+    right: auto !important;
+    left: 12px !important;
+    max-width: calc(100vw - 24px);
+    box-sizing: border-box;
+  }
 }
 
 /* Desktop enhancements: make like state visible with slight shadow */
