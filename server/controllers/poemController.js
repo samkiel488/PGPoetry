@@ -26,7 +26,23 @@ const getPoemBySlug = async (req, res) => {
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
-    res.json(poem);
+
+    // Fetch related poems based on matching tags
+    let relatedPoems = [];
+    if (poem.tags && poem.tags.length > 0) {
+      relatedPoems = await Poem.find({
+        _id: { $ne: poem._id }, // Exclude current poem
+        tags: { $in: poem.tags } // Match any tag
+      })
+      .sort({ views: -1, createdAt: -1 }) // Sort by views desc, then date desc
+      .limit(5) // Limit to 5 suggestions
+      .select('title slug tags featured thumbnail'); // Select only needed fields
+    }
+
+    res.json({
+      ...poem.toObject(),
+      relatedPoems
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching poem' });
   }

@@ -490,6 +490,7 @@ async function loadPoem() {
             </div>
             <div class="poem-actions">
                 <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
+                <button class="favorite-btn" id="favorite-btn" title="Save to Favorites">Save to Favorites</button>
                 <button class="share-btn" id="share-btn">Share</button>
                 <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
             </div>
@@ -651,13 +652,80 @@ function setupPoemInteractions(poem) {
                 log('Share button setup completed', 'success');
         }
         
+        // Favorite button logic
+        const favoriteBtn = document.getElementById('favorite-btn');
+        if (favoriteBtn) {
+            // Check if user is logged in and if poem is favorited
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (user) {
+                // Check if poem is in favorites (would need to fetch favorites or store locally)
+                favoriteBtn.onclick = async function(e) {
+                    e.preventDefault();
+                    log('Favorite button clicked', 'info');
+                    favoriteBtn.disabled = true;
+                    try {
+                        const response = await fetchWithErrorHandling(`${API_BASE}/users/${user.id}/favorites`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                            },
+                            body: JSON.stringify({ poemId: poem._id })
+                        });
+                        if (response.isFavorited) {
+                            favoriteBtn.textContent = 'Saved to Favorites';
+                            favoriteBtn.classList.add('favorited');
+                            showNotification('Poem saved to favorites!', 'success');
+                        } else {
+                            favoriteBtn.textContent = 'Save to Favorites';
+                            favoriteBtn.classList.remove('favorited');
+                            showNotification('Poem removed from favorites!', 'info');
+                        }
+                        log(`Favorite toggled successfully. Favorited: ${response.isFavorited}`, 'success');
+                    } catch (error) {
+                        log(`Error toggling favorite: ${error.message}`, 'error');
+                        showNotification('Could not save to favorites. Please try again.', 'error');
+                    } finally {
+                        favoriteBtn.disabled = false;
+                    }
+                };
+                // Additional fetch to get current favorite status and update button text
+                (async () => {
+                    try {
+                        const favorites = await fetchWithErrorHandling(`${API_BASE}/users/${user.id}/favorites`, {
+                            headers: {
+                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                            }
+                        });
+                        const isFavorited = favorites.some(fav => fav._id === poem._id);
+                        if (isFavorited) {
+                            favoriteBtn.textContent = 'Saved to Favorites';
+                            favoriteBtn.classList.add('favorited');
+                        } else {
+                            favoriteBtn.textContent = 'Save to Favorites';
+                            favoriteBtn.classList.remove('favorited');
+                        }
+                        log(`Favorite button initial state set. Favorited: ${isFavorited}`, 'success');
+                    } catch (err) {
+                        log(`Error fetching favorites for initial state: ${err.message}`, 'error');
+                    }
+                })();
+            } else {
+                favoriteBtn.onclick = function(e) {
+                    e.preventDefault();
+                    showNotification('Please log in to save favorites.', 'warning');
+                };
+            }
+            log('Favorite button setup completed', 'success');
+        }
+
         // Copy link button logic
         const copyBtn = document.getElementById('copy-link-btn');
         if (copyBtn) {
             copyBtn.onclick = function(e) {
                 e.preventDefault();
                 log('Copy link button clicked', 'info');
-                
+
                 const url = window.location.href;
                 navigator.clipboard.writeText(url).then(() => {
                     log('Link copied to clipboard successfully', 'success');

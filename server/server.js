@@ -10,6 +10,7 @@ const { getOrCreateOgImage } = require('./utils/imageGenerator');
 
 const authRoutes = require('./routes/auth');
 const poemRoutes = require('./routes/poems');
+const userRoutes = require('./routes/users');
 const Poem = require('./models/Poem');
 const { generateMetaTags } = require('./utils/seoUtils');
 
@@ -58,11 +59,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// Disabled rate limiting for testing purposes
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100 // limit each IP to 100 requests per windowMs
+// });
+// app.use(limiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -81,6 +83,7 @@ app.use('/images', express.static(path.join(__dirname, '..', 'images')));
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/poems', poemRoutes);
+app.use('/api/users', userRoutes);
 
 // Simple authenticated user info endpoint
 app.get('/api/me', require('./middleware/auth'), (req, res) => {

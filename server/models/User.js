@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
   refreshToken: { type: String },
+  favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Poem' }],
   createdAt: { type: Date, default: Date.now }
 });
 

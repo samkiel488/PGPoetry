@@ -9,7 +9,7 @@
     }
 
     function getSavedTheme(){
-        try { return localStorage.getItem('theme') || 'light'; } catch(e){ return 'light'; }
+        try { return localStorage.getItem('theme') || 'dark'; } catch(e){ return 'dark'; }
     }
 
     // Apply immediately (run as early as possible)

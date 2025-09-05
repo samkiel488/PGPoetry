@@ -44,41 +44,59 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ message: 'Missing fields' });
+    const { username, identifier, password } = req.body;
+    const loginUsername = username || identifier;
+    if (!loginUsername || !password) return res.status(400).json({ message: 'Missing fields' });
 
-    // Check against hardcoded credentials from .env
+    // Check if this is admin login
     const adminUsername = process.env.ADMIN_USERNAME;
     const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (!adminUsername || !adminPassword) {
-      console.error('Admin credentials not configured in .env file');
-      return res.status(500).json({ message: 'Server configuration error' });
+    if (loginUsername === adminUsername) {
+      if (password !== adminPassword) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      // Create a mock admin user object for token generation
+      const mockUser = {
+        _id: 'admin-user',
+        username: adminUsername,
+        role: 'admin'
+      };
+      const accessToken = signAccessToken(mockUser);
+      const refreshToken = signRefreshToken(mockUser);
+      return res.json({
+        accessToken,
+        refreshToken,
+        user: {
+          id: mockUser._id,
+          username: mockUser.username,
+          role: mockUser.role
+        }
+      });
     }
 
-    // Simple credential check
-    if (username !== adminUsername || password !== adminPassword) {
+    // Otherwise, check user credentials in database
+    const user = await User.findOne({ username: loginUsername });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Create a mock user object for token generation
-    const mockUser = {
-      _id: 'admin-user',
-      username: adminUsername,
-      role: 'admin'
-    };
-
     // Sign tokens
-    const accessToken = signAccessToken(mockUser);
-    const refreshToken = signRefreshToken(mockUser);
+    const accessToken = signAccessToken(user);
+    const refreshToken = signRefreshToken(user);
+    user.refreshToken = refreshToken;
+    await user.save();
 
     res.json({
       accessToken,
       refreshToken,
       user: {
-        id: mockUser._id,
-        username: mockUser.username,
-        role: mockUser.role
+        id: user._id,
+        username: user.username,
+        role: user.role
       }
     });
   } catch (err) {
