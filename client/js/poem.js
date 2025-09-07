@@ -491,8 +491,8 @@ async function loadPoem() {
             <div class="poem-actions">
                 <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
                 <button class="favorite-btn" id="favorite-btn" title="Save to Favorites">Save to Favorites</button>
-                <button class="share-btn" id="share-btn">Share</button>
                 <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
+                <button class="share-btn" id="share-btn" title="Share this poem">Share</button>
             </div>
         `;
         
@@ -611,28 +611,7 @@ function setupPoemInteractions(poem) {
             log('Like button setup completed', 'success');
         }
         
-        // Share button logic
-        const shareBtn = document.getElementById('share-btn');
-            if (shareBtn) {
-                shareBtn.onclick = function(e) {
-                    e.preventDefault();
-                    log('Share button clicked', 'info');
-                    const menu = document.getElementById('share-menu');
-                    if (!menu) return;
-                    // show first so we can measure width
-                    menu.classList.add('visible');
-                    menu.classList.add('anim-open');
-                    // Position menu near the button (simple approach)
-                    const rect = shareBtn.getBoundingClientRect();
-                    // compute left after visible so offsetWidth is accurate
-                    const left = Math.max(12, rect.left + window.scrollX + rect.width - menu.offsetWidth);
-                    menu.style.left = left + 'px';
-                    menu.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-                    // remove anim class after animation ends
-                    setTimeout(() => menu.classList.remove('anim-open'), 320);
-                };
-                log('Share button setup completed', 'success');
-        }
+
         
         // Favorite button logic
         const favoriteBtn = document.getElementById('favorite-btn');
@@ -720,76 +699,118 @@ function setupPoemInteractions(poem) {
             log('Copy link button setup completed', 'success');
         }
 
-        // Share menu option handlers
-        const shareCopy = document.getElementById('share-copy');
-        if (shareCopy) {
-            shareCopy.addEventListener('click', function() {
-                try {
-                    // Copy poem text + link
-                    const text = `${poem.title}\n\n${poem.content}\n\nRead more: ${window.location.href}`;
-                    navigator.clipboard.writeText(text).then(() => {
-                        showNotification('Poem and link copied to clipboard', 'success');
-                            // auto-close menu
-                            const menu = document.getElementById('share-menu'); if (menu) { menu.classList.remove('visible'); }
-                    }).catch(async () => {
-                        // fallback to input
-                        const fake = document.createElement('textarea');
-                        fake.value = text;
-                        document.body.appendChild(fake);
-                        fake.select();
-                        try { document.execCommand('copy'); showNotification('Poem and link copied to clipboard', 'success'); } catch (e) { showNotification('Copy failed', 'error'); }
-                        document.body.removeChild(fake);
-                    });
-                } catch (e) {
-                    console.error('share-copy error', e);
-                    showNotification('Could not copy', 'error');
-                }
-            });
+        // Share button logic
+        const shareBtn = document.getElementById('share-btn');
+        if (shareBtn) {
+            shareBtn.onclick = function(e) {
+                e.preventDefault();
+                log('Share button clicked', 'info');
+
+                // Create share menu
+                const shareMenu = document.createElement('div');
+                shareMenu.className = 'share-menu';
+                shareMenu.innerHTML = `
+                    <div class="share-menu-header">
+                        <h4>Share this poem</h4>
+                        <button class="share-menu-close">×</button>
+                    </div>
+                    <div class="share-options">
+                        <button class="share-option" data-platform="twitter">
+                            <span class="share-icon">🐦</span>
+                            <span>Twitter</span>
+                        </button>
+                        <button class="share-option" data-platform="facebook">
+                            <span class="share-icon">📘</span>
+                            <span>Facebook</span>
+                        </button>
+                        <button class="share-option" data-platform="whatsapp">
+                            <span class="share-icon">💬</span>
+                            <span>WhatsApp</span>
+                        </button>
+                        <button class="share-option" data-platform="copy">
+                            <span class="share-icon">🔗</span>
+                            <span>Copy Link</span>
+                        </button>
+                        <button class="share-option image" data-platform="image">
+                            <span class="share-icon">🖼️</span>
+                            <span>Share as Image</span>
+                        </button>
+                    </div>
+                `;
+
+                // Position the menu
+                const rect = shareBtn.getBoundingClientRect();
+                shareMenu.style.position = 'absolute';
+                shareMenu.style.top = `${rect.bottom + 5}px`;
+                shareMenu.style.left = `${rect.left}px`;
+                shareMenu.style.zIndex = '1000';
+
+                // Add to body
+                document.body.appendChild(shareMenu);
+
+                // Handle share option clicks
+                shareMenu.addEventListener('click', function(ev) {
+                    const option = ev.target.closest('.share-option');
+                    if (!option) return;
+
+                    const platform = option.dataset.platform;
+                    const url = window.location.href;
+                    const title = poem.title || 'Check out this poem';
+                    const text = `${title} - ${url}`;
+
+                    switch(platform) {
+                        case 'twitter':
+                            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+                            break;
+                        case 'facebook':
+                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                            break;
+                        case 'whatsapp':
+                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+                            break;
+                        case 'copy':
+                            navigator.clipboard.writeText(url).then(() => {
+                                showNotification('Link copied to clipboard!', 'success');
+                            }).catch(() => {
+                                showNotification('Failed to copy link.', 'error');
+                            });
+                            break;
+                        case 'image':
+                            // This will be handled by the delegated handler
+                            break;
+                    }
+
+                    // Close menu after action
+                    if (platform !== 'image') {
+                        shareMenu.remove();
+                    }
+                });
+
+                // Close menu when clicking close button
+                shareMenu.querySelector('.share-menu-close').onclick = function() {
+                    shareMenu.remove();
+                };
+
+                // Close menu when clicking outside
+                document.addEventListener('click', function closeMenu(ev) {
+                    if (!shareMenu.contains(ev.target) && ev.target !== shareBtn) {
+                        shareMenu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                });
+
+                log('Share menu created and displayed', 'success');
+            };
+            log('Share button setup completed', 'success');
         }
 
-        const shareImage = document.getElementById('share-image');
-        if (shareImage) {
-        shareImage.addEventListener('click', async function() {
-                try {
-            // Open preview modal and generate image with controls
-            openImagePreviewModal(poem);
-                } catch (e) {
-                    console.error('share-image error', e);
-                    showNotification('Could not create image', 'error');
-                }
-            });
-        }
-
-        const shareSocials = document.getElementById('share-socials');
-        if (shareSocials) {
-            shareSocials.addEventListener('click', function() {
-                // open share links section already rendered by renderShareButtons
-                const shareButtons = document.querySelector('.share-buttons');
-                if (shareButtons) {
-                    shareButtons.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    shareButtons.style.outline = '3px solid rgba(102,126,234,0.12)';
-                    setTimeout(() => { shareButtons.style.outline = ''; }, 1500);
-                } else {
-                    showNotification('Social share options not available', 'warning');
-                }
-            });
-        }
-        
         log('All poem interactions setup completed', 'success');
         
     } catch (error) {
         log(`Error setting up poem interactions: ${error.message}`, 'error');
     }
 
-            // Close share menu when clicking outside or pressing Escape
-            document.addEventListener('click', function(ev){
-                const menu = document.getElementById('share-menu');
-                if (!menu || !menu.classList.contains('visible')) return;
-                if (ev.target.closest && ev.target.closest('.share-menu')) return; // inside
-                if (ev.target.closest && ev.target.closest('#share-btn')) return; // share button
-                menu.classList.remove('visible');
-            });
-            document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { const menu = document.getElementById('share-menu'); if (menu) menu.classList.remove('visible'); } });
+
 }
 
 // Ensure delegated handler for share-image exists (prevents cases where element wasn't present)
@@ -1332,7 +1353,7 @@ function setupCommentForm() {
 
         if (!user) {
             // Hide form for non-logged-in users
-            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/auth">log in</a> to leave a comment.</p>';
+            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/auth.html">log in</a> to leave a comment.</p>';
             return;
         }
 
