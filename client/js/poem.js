@@ -1332,7 +1332,7 @@ function setupCommentForm() {
 
         if (!user) {
             // Hide form for non-logged-in users
-            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/login">log in</a> to leave a comment.</p>';
+            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/auth">log in</a> to leave a comment.</p>';
             return;
         }
 
