@@ -13,7 +13,10 @@ const {
   likePoem,
   getTopLikedPoems,
   getTopViewedPoems,
-  getRSSFeed
+  getRSSFeed,
+  getComments,
+  createComment,
+  deleteComment
 } = require('../controllers/poemController');
 const path = require('path');
 const fs = require('fs');
@@ -78,6 +81,19 @@ const likeLimiter = rateLimit({
   }
 });
 router.post('/:id/like', likeLimiter, likePoem);
+
+// Comment routes
+router.get('/:id/comments', getComments);
+router.post('/:id/comments', auth, [
+  body('text').trim().isLength({ min: 1, max: 1000 }).escape()
+], (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+}, createComment);
+router.delete('/comments/:id', auth, deleteComment);
 
 // Add route for getting poem by id (for admin edit modal)
 router.get('/id/:id', auth, async (req, res) => {

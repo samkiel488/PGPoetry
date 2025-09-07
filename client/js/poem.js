@@ -496,48 +496,30 @@ async function loadPoem() {
             </div>
         `;
         
-        container.innerHTML = poemHTML;
-        log('Poem HTML rendered successfully', 'success');
+        // Render poem content into the dedicated poem-content div
+        const poemContentDiv = document.getElementById('poem-content');
+        if (poemContentDiv) {
+            poemContentDiv.innerHTML = poemHTML;
+            log('Poem HTML rendered successfully', 'success');
+        } else {
+            log('Poem content container not found', 'error');
+        }
         
         // Add share buttons (server provides share links via meta endpoint)
-        try {
-            const shareResp = await fetch(`${API_BASE}/poems/${poem.slug}`);
-            const shareData = await shareResp.json();
-            const shareLinks = {
-                twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`Just read this amazing piece on ${document.title.split(' — ')[1] || "PG'sPoeticPen"} ✨: ${poem.title}`)}`,
-                facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
-                whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(`Just read this amazing piece on ${document.title.split(' — ')[1] || "PG'sPoeticPen"} ✨: ${poem.title}`)}%20${encodeURIComponent(window.location.href)}`,
-                copy: window.location.href
-            };
-            renderShareButtons(shareLinks);
-            // Add share menu container (for advanced share actions)
-            const container = document.getElementById('poem-container');
-            if (container) {
-                const menu = document.createElement('div');
-                menu.className = 'share-menu';
-                menu.id = 'share-menu';
-                menu.style.position = 'absolute';
-                menu.innerHTML = `
-                    <div class="share-option copy" id="share-copy">
-                        <span class="icon">📋</span><span>Copy poem & link</span>
-                    </div>
-                    <div class="share-option image" id="share-image">
-                        <span class="icon">🖼️</span><span>Share as image</span>
-                    </div>
-                    <div class="share-option social" id="share-socials">
-                        <span class="icon">🔗</span><span>Share to social sites</span>
-                    </div>
-                `;
-                // append to body so positioning and offsetWidth are reliable
-                document.body.appendChild(menu);
-            }
-        } catch (e) {
-            console.error('Error fetching share links', e);
-        }
+        // Removed social share buttons as per user request
 
         // Setup interactive elements
         setupPoemInteractions(poem);
-        
+
+        // Render related poems if available
+        if (poem.relatedPoems && poem.relatedPoems.length > 0) {
+            renderRelatedPoems(poem.relatedPoems);
+        }
+
+        // Load and setup comments
+        await loadComments(poem._id);
+        setupCommentForm();
+
     } catch (error) {
         log(`Error loading poem: ${error.message}`, 'error');
         const container = document.getElementById('poem-container');
@@ -1115,22 +1097,271 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// After rendering poem HTML, fetch server-generated share links and render buttons
-(async function() {
+// Render related poems section
+function renderRelatedPoems(relatedPoems) {
     try {
-        const apiBase = typeof API_BASE !== 'undefined' ? API_BASE : '';
-        const shareResp = await fetch(`${apiBase}/api/poems/${window.__POEM_SLUG__ || (window.location.pathname.split('/').pop())}/share-links`);
-        if (!shareResp.ok) throw new Error('Share links fetch failed');
-        const shareLinks = await shareResp.json();
-        renderShareButtons(shareLinks);
-    } catch (err) {
-        console.warn('Could not fetch server share links, using fallback', err);
-        const fallback = {
-            twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(document.title || 'Check this poem')}`,
-            facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
-            whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(document.title || 'Check this poem')}%20${encodeURIComponent(window.location.href)}`,
-            copy: window.location.href
-        };
-        renderShareButtons(fallback);
+        log('Rendering related poems...', 'info');
+
+        // Find or create related poems container
+        let relatedContainer = document.getElementById('related-poems');
+        if (!relatedContainer) {
+            const poemContentDiv = document.getElementById('poem-content');
+            if (poemContentDiv) {
+                relatedContainer = document.createElement('div');
+                relatedContainer.id = 'related-poems';
+                relatedContainer.className = 'related-poems';
+                poemContentDiv.appendChild(relatedContainer);
+            } else {
+                log('Poem content container not found for related poems', 'error');
+                return;
+            }
+        }
+
+        if (!relatedPoems || relatedPoems.length === 0) {
+            relatedContainer.innerHTML = '';
+            return;
+        }
+
+        const relatedHTML = `
+            <h3>You might also like</h3>
+            <div class="related-poems-grid">
+                ${relatedPoems.map(poem => `
+                    <div class="related-poem-card" data-slug="${poem.slug}">
+                        <div class="related-poem-content">
+                            <h4>${poem.title}</h4>
+                            ${poem.tags && poem.tags.length > 0 ? `<div class="related-poem-tags">${poem.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` : ''}
+                        </div>
+                        <div class="related-poem-meta">
+                            <span class="views">${poem.views || 0} views</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        relatedContainer.innerHTML = relatedHTML;
+
+        // Add click handlers for related poems
+        const relatedCards = relatedContainer.querySelectorAll('.related-poem-card');
+        relatedCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const slug = this.dataset.slug;
+                if (slug) {
+                    window.location.href = `/poem/${slug}`;
+                }
+            });
+        });
+
+        log(`Related poems rendered successfully: ${relatedPoems.length} poems`, 'success');
+
+    } catch (error) {
+        log(`Error rendering related poems: ${error.message}`, 'error');
+        // Don't show notification for related poems errors to avoid spam
     }
-})();
+}
+
+// Comment functionality
+async function loadComments(poemId) {
+    try {
+        log('Loading comments...', 'info');
+        const comments = await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/comments`);
+        renderComments(comments);
+        log(`Comments loaded successfully: ${comments.length} comments`, 'success');
+    } catch (error) {
+        log(`Error loading comments: ${error.message}`, 'error');
+        showNotification('Error loading comments', 'error');
+    }
+}
+
+function renderComments(comments) {
+    try {
+        const commentsList = document.getElementById('comments-list');
+        if (!commentsList) return;
+
+        if (!comments || comments.length === 0) {
+            commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to share your thoughts!</p>';
+            return;
+        }
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const commentsHTML = comments.map(comment => {
+            const isAuthor = user && comment.user && comment.user._id === user.id;
+            const isAdmin = user && user.role === 'admin';
+            const canDelete = isAuthor || isAdmin;
+
+            return `
+                <div class="comment" data-comment-id="${comment._id}">
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.user ? comment.user.username : 'Anonymous'}</span>
+                        <span class="comment-date">${formatDate(comment.createdAt)}</span>
+                        ${canDelete ? `<button class="comment-delete-btn" data-comment-id="${comment._id}" title="Delete comment">×</button>` : ''}
+                    </div>
+                    <div class="comment-content">${comment.text.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+        }).join('');
+
+        commentsList.innerHTML = commentsHTML;
+
+        // Add delete button event listeners
+        const deleteButtons = commentsList.querySelectorAll('.comment-delete-btn');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', handleCommentDelete);
+        });
+
+        log('Comments rendered successfully', 'success');
+    } catch (error) {
+        log(`Error rendering comments: ${error.message}`, 'error');
+    }
+}
+
+async function handleCommentSubmit(event) {
+    event.preventDefault();
+
+    try {
+        const form = event.target;
+        const textArea = form.querySelector('#comment-text');
+        const text = textArea.value.trim();
+
+        if (!text) {
+            showNotification('Please enter a comment', 'warning');
+            return;
+        }
+
+        if (text.length > 1000) {
+            showNotification('Comment cannot exceed 1000 characters', 'warning');
+            return;
+        }
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+            showNotification('Please log in to comment', 'warning');
+            return;
+        }
+
+        const poemId = window.__CURRENT_POEM__ ? window.__CURRENT_POEM__._id : null;
+        if (!poemId) {
+            showNotification('Poem data not available', 'error');
+            return;
+        }
+
+        const submitBtn = form.querySelector('#comment-submit-btn');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting...';
+
+        const comment = await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            },
+            body: JSON.stringify({ text })
+        });
+
+        // Clear form
+        textArea.value = '';
+
+        // Reload comments to show the new one
+        await loadComments(poemId);
+
+        showNotification('Comment posted successfully!', 'success');
+        log('Comment posted successfully', 'success');
+
+    } catch (error) {
+        log(`Error posting comment: ${error.message}`, 'error');
+        showNotification('Error posting comment', 'error');
+    } finally {
+        const submitBtn = form.querySelector('#comment-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Post Comment';
+        }
+    }
+}
+
+async function handleCommentDelete(event) {
+    event.preventDefault();
+
+    try {
+        const commentId = event.target.dataset.commentId;
+        if (!commentId) return;
+
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+            showNotification('Please log in to delete comments', 'warning');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to delete this comment?')) {
+            return;
+        }
+
+        const poemId = window.__CURRENT_POEM__ ? window.__CURRENT_POEM__._id : null;
+        if (!poemId) {
+            showNotification('Poem data not available', 'error');
+            return;
+        }
+
+        await fetchWithErrorHandling(`${API_BASE}/poems/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+            }
+        });
+
+        // Reload comments to remove the deleted one
+        await loadComments(poemId);
+
+        showNotification('Comment deleted successfully', 'success');
+        log('Comment deleted successfully', 'success');
+
+    } catch (error) {
+        log(`Error deleting comment: ${error.message}`, 'error');
+        showNotification('Error deleting comment', 'error');
+    }
+}
+
+function setupCommentForm() {
+    try {
+        const commentForm = document.getElementById('comment-form');
+        const commentFormContainer = document.getElementById('comment-form-container');
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        if (!commentForm || !commentFormContainer) return;
+
+        if (!user) {
+            // Hide form for non-logged-in users
+            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/login">log in</a> to leave a comment.</p>';
+            return;
+        }
+
+        // Show form for logged-in users
+        commentForm.addEventListener('submit', handleCommentSubmit);
+
+        log('Comment form setup completed', 'success');
+    } catch (error) {
+        log(`Error setting up comment form: ${error.message}`, 'error');
+    }
+}
+
+/* Removed social share buttons rendering as per user request */
+// After rendering poem HTML, fetch server-generated share links and render buttons
+// (function() {
+//     try {
+//         const apiBase = typeof API_BASE !== 'undefined' ? API_BASE : '';
+//         const shareResp = await fetch(`${apiBase}/api/poems/${window.__POEM_SLUG__ || (window.location.pathname.split('/').pop())}/share-links`);
+//         if (!shareResp.ok) throw new Error('Share links fetch failed');
+//         const shareLinks = await shareResp.json();
+//         renderShareButtons(shareLinks);
+//     } catch (err) {
+//         console.warn('Could not fetch server share links, using fallback', err);
+//         const fallback = {
+//             twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(document.title || 'Check this poem')}`,
+//             facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+//             whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(document.title || 'Check this poem')}%20${encodeURIComponent(window.location.href)}`,
+//             copy: window.location.href
+//         };
+//         renderShareButtons(fallback);
+//     }
+// })();

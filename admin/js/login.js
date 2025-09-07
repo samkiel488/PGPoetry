@@ -15,6 +15,14 @@ function showError(message) {
 
 // Check if user is already logged in
 document.addEventListener('DOMContentLoaded', function() {
+    // Clear all tokens on page load to enforce clean login
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
+
     // Get DOM elements after DOM is ready
     const loginForm = document.getElementById('login-form');
 
@@ -45,6 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 // Store tokens in localStorage
                 if (data && data.accessToken) {
+                    // Clear client user tokens to avoid confusion
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('refreshToken');
+
                     localStorage.setItem('adminToken', data.accessToken);
                     localStorage.setItem('adminRefreshToken', data.refreshToken || '');
                     localStorage.setItem('adminUser', JSON.stringify(data.user || {}));

@@ -1,0 +1,135 @@
+/* Comment Section Styling */
+.comments-section {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1rem 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    font-family: 'Source Sans Pro', sans-serif;
+    color: #333;
+}
+
+body.dark .comments-section {
+    background-color: #232b39;
+    color: #f1f1f1;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+.comments-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e74c3c;
+    padding-bottom: 0.5rem;
+    color: #e74c3c;
+}
+
+.comments-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding-right: 0.5rem;
+}
+
+.comment {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.75rem 0;
+}
+
+body.dark .comment {
+    border-color: #444;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    color: #555;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #e74c3c;
+}
+
+.comment-date {
+    font-style: italic;
+    color: #999;
+}
+
+.comment-delete-btn {
+    background: transparent;
+    border: none;
+    color: #e74c3c;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0 0.25rem;
+    transition: color 0.3s ease;
+}
+
+.comment-delete-btn:hover {
+    color: #c0392b;
+}
+
+.comment-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #333;
+}
+
+body.dark .comment-content {
+    color: #ddd;
+}
+
+.comment-form-container {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 1rem;
+}
+
+body.dark .comment-form-container {
+    border-color: #444;
+}
+
+#comment-form textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 80px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: 'Source Sans Pro', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+#comment-form textarea:focus {
+    outline: none;
+    border-color: #e74c3c;
+}
+
+#comment-submit-btn {
+    margin-top: 0.5rem;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#comment-submit-btn:hover {
+    background-color: #c0392b;
+}
+
+#comment-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

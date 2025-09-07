@@ -1,4 +1,5 @@
 const Poem = require('../models/Poem');
+const Comment = require('../models/Comment');
 const slugify = require('slugify');
 
 // Get all poems (public)
@@ -52,9 +53,9 @@ const getPoemBySlug = async (req, res) => {
 const createPoem = async (req, res) => {
   try {
     const { title, content, tags, featured } = req.body;
-    
+
     const slug = slugify(title, { lower: true, strict: true });
-    
+
     const poem = new Poem({
       title,
       slug,
@@ -103,7 +104,7 @@ const updatePoem = async (req, res) => {
 const deletePoem = async (req, res) => {
   try {
     const poem = await Poem.findByIdAndDelete(req.params.id);
-    
+
     if (!poem) {
       return res.status(404).json({ message: 'Poem not found' });
     }
@@ -166,6 +167,90 @@ const getRSSFeed = async (req, res) => {
   }
 };
 
+// Get comments for a poem
+const getComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify poem exists
+    const poem = await Poem.findById(id);
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    const comments = await Comment.find({ poemId: id })
+      .populate('user', 'username role')
+      .sort({ createdAt: -1 });
+
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching comments' });
+  }
+};
+
+// Create a new comment
+const createComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text } = req.body;
+    const userId = req.user._id;
+
+    // Verify poem exists
+    const poem = await Poem.findById(id);
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    // Validate input
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ message: 'Comment text is required' });
+    }
+
+    if (text.length > 1000) {
+      return res.status(400).json({ message: 'Comment cannot exceed 1000 characters' });
+    }
+
+    const comment = new Comment({
+      poemId: id,
+      userId,
+      text: text.trim()
+    });
+
+    await comment.save();
+
+    // Populate user data for response
+    await comment.populate('user', 'username role');
+
+    res.status(201).json(comment);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating comment' });
+  }
+};
+
+// Delete a comment
+const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    const comment = await Comment.findById(id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    // Check if user is the author or an admin
+    if (comment.userId.toString() !== userId && userRole !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to delete this comment' });
+    }
+
+    await Comment.findByIdAndDelete(id);
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting comment' });
+  }
+};
+
 module.exports = {
   getAllPoems,
   getPoemBySlug,
@@ -175,5 +260,8 @@ module.exports = {
   likePoem,
   getTopLikedPoems,
   getTopViewedPoems,
-  getRSSFeed
+  getRSSFeed,
+  getComments,
+  createComment,
+  deleteComment
 };
