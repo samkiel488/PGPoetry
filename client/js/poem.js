@@ -699,107 +699,13 @@ function setupPoemInteractions(poem) {
             log('Copy link button setup completed', 'success');
         }
 
-        // Share button logic
+        // Share button logic - shows share options modal
         const shareBtn = document.getElementById('share-btn');
         if (shareBtn) {
             shareBtn.onclick = function(e) {
                 e.preventDefault();
                 log('Share button clicked', 'info');
-
-                // Create share menu
-                const shareMenu = document.createElement('div');
-                shareMenu.className = 'share-menu';
-                shareMenu.innerHTML = `
-                    <div class="share-menu-header">
-                        <h4>Share this poem</h4>
-                        <button class="share-menu-close">×</button>
-                    </div>
-                    <div class="share-options">
-                        <button class="share-option" data-platform="twitter">
-                            <span class="share-icon">🐦</span>
-                            <span>Twitter</span>
-                        </button>
-                        <button class="share-option" data-platform="facebook">
-                            <span class="share-icon">📘</span>
-                            <span>Facebook</span>
-                        </button>
-                        <button class="share-option" data-platform="whatsapp">
-                            <span class="share-icon">💬</span>
-                            <span>WhatsApp</span>
-                        </button>
-                        <button class="share-option" data-platform="copy">
-                            <span class="share-icon">🔗</span>
-                            <span>Copy Link</span>
-                        </button>
-                        <button class="share-option image" data-platform="image">
-                            <span class="share-icon">🖼️</span>
-                            <span>Share as Image</span>
-                        </button>
-                    </div>
-                `;
-
-                // Position the menu
-                const rect = shareBtn.getBoundingClientRect();
-                shareMenu.style.position = 'absolute';
-                shareMenu.style.top = `${rect.bottom + 5}px`;
-                shareMenu.style.left = `${rect.left}px`;
-                shareMenu.style.zIndex = '1000';
-
-                // Add to body
-                document.body.appendChild(shareMenu);
-
-                // Handle share option clicks
-                shareMenu.addEventListener('click', function(ev) {
-                    const option = ev.target.closest('.share-option');
-                    if (!option) return;
-
-                    const platform = option.dataset.platform;
-                    const url = window.location.href;
-                    const title = poem.title || 'Check out this poem';
-                    const text = `${title} - ${url}`;
-
-                    switch(platform) {
-                        case 'twitter':
-                            window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
-                            break;
-                        case 'facebook':
-                            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-                            break;
-                        case 'whatsapp':
-                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-                            break;
-                        case 'copy':
-                            navigator.clipboard.writeText(url).then(() => {
-                                showNotification('Link copied to clipboard!', 'success');
-                            }).catch(() => {
-                                showNotification('Failed to copy link.', 'error');
-                            });
-                            break;
-                        case 'image':
-                            // This will be handled by the delegated handler
-                            break;
-                    }
-
-                    // Close menu after action
-                    if (platform !== 'image') {
-                        shareMenu.remove();
-                    }
-                });
-
-                // Close menu when clicking close button
-                shareMenu.querySelector('.share-menu-close').onclick = function() {
-                    shareMenu.remove();
-                };
-
-                // Close menu when clicking outside
-                document.addEventListener('click', function closeMenu(ev) {
-                    if (!shareMenu.contains(ev.target) && ev.target !== shareBtn) {
-                        shareMenu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
-                });
-
-                log('Share menu created and displayed', 'success');
+                showShareOptionsModal(poem);
             };
             log('Share button setup completed', 'success');
         }
@@ -1366,9 +1272,183 @@ function setupCommentForm() {
     }
 }
 
+// Share options modal
+function showShareOptionsModal(poem) {
+    try {
+        log('Opening share options modal', 'info');
+
+        // Remove existing modal if present
+        const existingModal = document.getElementById('share-options-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'share-options-modal';
+        modal.className = 'share-options-modal';
+        modal.innerHTML = `
+            <div class="share-modal-overlay"></div>
+            <div class="share-modal-content">
+                <div class="share-modal-header">
+                    <h3>Share this poem</h3>
+                    <button class="share-modal-close" id="share-modal-close">×</button>
+                </div>
+                <div class="share-options">
+                    <button class="share-option share-option-image" id="share-image-option">
+                        <div class="share-option-icon">🖼️</div>
+                        <div class="share-option-text">
+                            <div class="share-option-title">Share as Image</div>
+                            <div class="share-option-desc">Generate and download a beautiful image</div>
+                        </div>
+                    </button>
+                    <button class="share-option share-option-link" id="share-link-option">
+                        <div class="share-option-icon">🔗</div>
+                        <div class="share-option-text">
+                            <div class="share-option-title">Copy Link</div>
+                            <div class="share-option-desc">Copy the poem link to clipboard</div>
+                        </div>
+                    </button>
+                    <button class="share-option share-option-social" id="share-social-option">
+                        <div class="share-option-icon">📱</div>
+                        <div class="share-option-text">
+                            <div class="share-option-title">Share to Social Media</div>
+                            <div class="share-option-desc">Share on Twitter, Facebook, WhatsApp</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Show modal
+        setTimeout(() => {
+            modal.classList.add('visible');
+        }, 10);
+
+        // Close modal handlers
+        const closeModal = () => {
+            modal.classList.remove('visible');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        };
+
+        modal.querySelector('#share-modal-close').addEventListener('click', closeModal);
+        modal.querySelector('.share-modal-overlay').addEventListener('click', closeModal);
+
+        // Share option handlers
+        modal.querySelector('#share-image-option').addEventListener('click', () => {
+            closeModal();
+            openImagePreviewModal(poem);
+        });
+
+        modal.querySelector('#share-link-option').addEventListener('click', () => {
+            closeModal();
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                log('Link copied to clipboard successfully', 'success');
+                showNotification('Link copied to clipboard!', 'success');
+            }).catch((error) => {
+                log(`Failed to copy link: ${error.message}`, 'error');
+                showNotification('Failed to copy link.', 'error');
+            });
+        });
+
+        modal.querySelector('#share-social-option').addEventListener('click', () => {
+            closeModal();
+            showSocialShareModal(poem);
+        });
+
+        log('Share options modal created successfully', 'success');
+
+    } catch (error) {
+        log(`Error creating share options modal: ${error.message}`, 'error');
+        showNotification('Could not open share options', 'error');
+    }
+}
+
+// Social media share modal
+function showSocialShareModal(poem) {
+    try {
+        log('Opening social share modal', 'info');
+
+        // Remove existing modal if present
+        const existingModal = document.getElementById('social-share-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(poem.title || 'Check out this poem');
+        const text = encodeURIComponent(`Check out this poem: "${poem.title}"`);
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'social-share-modal';
+        modal.className = 'social-share-modal';
+        modal.innerHTML = `
+            <div class="social-modal-overlay"></div>
+            <div class="social-modal-content">
+                <div class="social-modal-header">
+                    <h3>Share on Social Media</h3>
+                    <button class="social-modal-close" id="social-modal-close">×</button>
+                </div>
+                <div class="social-share-buttons">
+                    <a href="https://twitter.com/intent/tweet?url=${url}&text=${text}" target="_blank" rel="noopener noreferrer" class="social-btn social-twitter">
+                        <span class="social-icon">🐦</span>
+                        <span class="social-text">Twitter</span>
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=${url}" target="_blank" rel="noopener noreferrer" class="social-btn social-facebook">
+                        <span class="social-icon">📘</span>
+                        <span class="social-text">Facebook</span>
+                    </a>
+                    <a href="https://api.whatsapp.com/send?text=${text}%20${url}" target="_blank" rel="noopener noreferrer" class="social-btn social-whatsapp">
+                        <span class="social-icon">💬</span>
+                        <span class="social-text">WhatsApp</span>
+                    </a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url=${url}" target="_blank" rel="noopener noreferrer" class="social-btn social-linkedin">
+                        <span class="social-icon">💼</span>
+                        <span class="social-text">LinkedIn</span>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Show modal
+        setTimeout(() => {
+            modal.classList.add('visible');
+        }, 10);
+
+        // Close modal handlers
+        const closeModal = () => {
+            modal.classList.remove('visible');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        };
+
+        modal.querySelector('#social-modal-close').addEventListener('click', closeModal);
+        modal.querySelector('.social-modal-overlay').addEventListener('click', closeModal);
+
+        log('Social share modal created successfully', 'success');
+
+    } catch (error) {
+        log(`Error creating social share modal: ${error.message}`, 'error');
+        showNotification('Could not open social share options', 'error');
+    }
+}
+
 /* Removed social share buttons rendering as per user request */
 // After rendering poem HTML, fetch server-generated share links and render buttons
-// (function() {
+// (async function() {
 //     try {
 //         const apiBase = typeof API_BASE !== 'undefined' ? API_BASE : '';
 //         const shareResp = await fetch(`${apiBase}/api/poems/${window.__POEM_SLUG__ || (window.location.pathname.split('/').pop())}/share-links`);
