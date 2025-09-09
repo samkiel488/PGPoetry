@@ -1,5 +1,6 @@
 const Poem = require('../models/Poem');
 const Comment = require('../models/Comment');
+const Favorite = require('../models/Favorite');
 const slugify = require('slugify');
 
 // Get all poems (public)
@@ -193,7 +194,7 @@ const createComment = async (req, res) => {
   try {
     const { id } = req.params;
     const { text } = req.body;
-    const userId = req.user._id;
+    const userId = req.user ? req.user._id : null;
 
     // Verify poem exists
     const poem = await Poem.findById(id);
@@ -218,8 +219,10 @@ const createComment = async (req, res) => {
 
     await comment.save();
 
-    // Populate user data for response
-    await comment.populate('user', 'username role');
+    // Populate user data for response if user exists
+    if (userId) {
+      await comment.populate('user', 'username role');
+    }
 
     res.status(201).json(comment);
   } catch (error) {
@@ -251,6 +254,82 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// Add favorite to a poem
+const addFavorite = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    // Verify poem exists
+    const poem = await Poem.findById(id);
+    if (!poem) {
+      return res.status(404).json({ message: 'Poem not found' });
+    }
+
+    // Check if already favorited
+    const existingFavorite = await Favorite.findOne({ userId, poemId: id });
+    if (existingFavorite) {
+      return res.status(400).json({ message: 'Poem already favorited' });
+    }
+
+    const favorite = new Favorite({
+      userId,
+      poemId: id
+    });
+
+    await favorite.save();
+    res.status(201).json({ message: 'Poem favorited successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding favorite' });
+  }
+};
+
+// Remove favorite from a poem
+const removeFavorite = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const favorite = await Favorite.findOneAndDelete({ userId, poemId: id });
+    if (!favorite) {
+      return res.status(404).json({ message: 'Favorite not found' });
+    }
+
+    res.json({ message: 'Favorite removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error removing favorite' });
+  }
+};
+
+// Get user's favorites
+const getUserFavorites = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const favorites = await Favorite.find({ userId })
+      .populate('poemId', 'title slug tags featured thumbnail likes views createdAt')
+      .sort({ createdAt: -1 });
+
+    const poems = favorites.map(fav => fav.poemId);
+    res.json(poems);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching favorites' });
+  }
+};
+
+// Check if poem is favorited by user
+const checkFavorite = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const favorite = await Favorite.findOne({ userId, poemId: id });
+    res.json({ isFavorited: !!favorite });
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking favorite status' });
+  }
+};
+
 module.exports = {
   getAllPoems,
   getPoemBySlug,
@@ -263,5 +342,9 @@ module.exports = {
   getRSSFeed,
   getComments,
   createComment,
-  deleteComment
+  deleteComment,
+  addFavorite,
+  removeFavorite,
+  getUserFavorites,
+  checkFavorite
 };

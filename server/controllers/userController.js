@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const Poem = require('../models/Poem');
 
-// Toggle favorite for a user
+// Toggle favorite for a user (now supports anonymous)
 const toggleFavorite = async (req, res) => {
   try {
     const { id } = req.params;
@@ -11,14 +11,33 @@ const toggleFavorite = async (req, res) => {
       return res.status(400).json({ message: 'Poem ID is required' });
     }
 
-    // Ensure user can only modify their own favorites
-    if (req.user.id !== id) {
+    // For authenticated users, ensure they can only modify their own favorites
+    if (req.user && req.user.id !== id) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // For anonymous users, use a special "anonymous" user ID
+    const userId = req.user ? id : 'anonymous-user';
+
+    let user;
+    if (req.user) {
+      // Authenticated user
+      user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+    } else {
+      // Anonymous user - create or find anonymous user record
+      user = await User.findOne({ _id: 'anonymous-user' });
+      if (!user) {
+        user = new User({
+          _id: 'anonymous-user',
+          username: 'Anonymous',
+          email: 'anonymous@example.com',
+          favorites: []
+        });
+        await user.save();
+      }
     }
 
     const poem = await Poem.findById(poemId);

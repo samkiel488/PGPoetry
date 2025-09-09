@@ -53,6 +53,11 @@ body.dark .comment {
 .comment-author {
     font-weight: 600;
     color: #e74c3c;
+    word-break: break-word;
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .comment-date {

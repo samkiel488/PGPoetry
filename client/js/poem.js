@@ -490,7 +490,6 @@ async function loadPoem() {
             </div>
             <div class="poem-actions">
                 <button class="like-btn" id="like-btn"><span class="like-count">${poem.likes || 0}</span> likes</button>
-                <button class="favorite-btn" id="favorite-btn" title="Save to Favorites">Save to Favorites</button>
                 <button class="copy-link-btn" id="copy-link-btn" title="Copy link to this poem">Copy Link</button>
                 <button class="share-btn" id="share-btn" title="Share this poem">Share</button>
             </div>
@@ -613,72 +612,7 @@ function setupPoemInteractions(poem) {
         
 
         
-        // Favorite button logic
-        const favoriteBtn = document.getElementById('favorite-btn');
-        if (favoriteBtn) {
-            // Check if user is logged in and if poem is favorited
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (user) {
-                // Check if poem is in favorites (would need to fetch favorites or store locally)
-                favoriteBtn.onclick = async function(e) {
-                    e.preventDefault();
-                    log('Favorite button clicked', 'info');
-                    favoriteBtn.disabled = true;
-                    try {
-                        const response = await fetchWithErrorHandling(`${API_BASE}/users/${user.id}/favorites`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-                            },
-                            body: JSON.stringify({ poemId: poem._id })
-                        });
-                        if (response.isFavorited) {
-                            favoriteBtn.textContent = 'Saved to Favorites';
-                            favoriteBtn.classList.add('favorited');
-                            showNotification('Poem saved to favorites!', 'success');
-                        } else {
-                            favoriteBtn.textContent = 'Save to Favorites';
-                            favoriteBtn.classList.remove('favorited');
-                            showNotification('Poem removed from favorites!', 'info');
-                        }
-                        log(`Favorite toggled successfully. Favorited: ${response.isFavorited}`, 'success');
-                    } catch (error) {
-                        log(`Error toggling favorite: ${error.message}`, 'error');
-                        showNotification('Could not save to favorites. Please try again.', 'error');
-                    } finally {
-                        favoriteBtn.disabled = false;
-                    }
-                };
-                // Additional fetch to get current favorite status and update button text
-                (async () => {
-                    try {
-                        const favorites = await fetchWithErrorHandling(`${API_BASE}/users/${user.id}/favorites`, {
-                            headers: {
-                                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-                            }
-                        });
-                        const isFavorited = favorites.some(fav => fav._id === poem._id);
-                        if (isFavorited) {
-                            favoriteBtn.textContent = 'Saved to Favorites';
-                            favoriteBtn.classList.add('favorited');
-                        } else {
-                            favoriteBtn.textContent = 'Save to Favorites';
-                            favoriteBtn.classList.remove('favorited');
-                        }
-                        log(`Favorite button initial state set. Favorited: ${isFavorited}`, 'success');
-                    } catch (err) {
-                        log(`Error fetching favorites for initial state: ${err.message}`, 'error');
-                    }
-                })();
-            } else {
-                favoriteBtn.onclick = function(e) {
-                    e.preventDefault();
-                    showNotification('Please log in to save favorites.', 'warning');
-                };
-            }
-            log('Favorite button setup completed', 'success');
-        }
+
 
         // Copy link button logic
         const copyBtn = document.getElementById('copy-link-btn');
@@ -1161,10 +1095,6 @@ async function handleCommentSubmit(event) {
         }
 
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (!user) {
-            showNotification('Please log in to comment', 'warning');
-            return;
-        }
 
         const poemId = window.__CURRENT_POEM__ ? window.__CURRENT_POEM__._id : null;
         if (!poemId) {
@@ -1177,12 +1107,17 @@ async function handleCommentSubmit(event) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Posting...';
 
+        // Prepare headers: include Authorization if user is logged in
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (user && localStorage.getItem('accessToken')) {
+            headers['Authorization'] = 'Bearer ' + localStorage.getItem('accessToken');
+        }
+
         const comment = await fetchWithErrorHandling(`${API_BASE}/poems/${poemId}/comments`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-            },
+            headers: headers,
             body: JSON.stringify({ text })
         });
 
@@ -1253,17 +1188,18 @@ function setupCommentForm() {
     try {
         const commentForm = document.getElementById('comment-form');
         const commentFormContainer = document.getElementById('comment-form-container');
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        // const user = JSON.parse(localStorage.getItem('user') || 'null');
 
         if (!commentForm || !commentFormContainer) return;
 
-        if (!user) {
-            // Hide form for non-logged-in users
-            commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/auth.html">log in</a> to leave a comment.</p>';
-            return;
-        }
+        // Always show form, allow anonymous comments
+        // if (!user) {
+        //     // Hide form for non-logged-in users
+        //     commentFormContainer.innerHTML = '<p class="login-prompt">Please <a href="/auth.html">log in</a> to leave a comment.</p>';
+        //     return;
+        // }
 
-        // Show form for logged-in users
+        // Show form for all users
         commentForm.addEventListener('submit', handleCommentSubmit);
 
         log('Comment form setup completed', 'success');

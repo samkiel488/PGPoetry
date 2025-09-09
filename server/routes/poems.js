@@ -16,7 +16,11 @@ const {
   getRSSFeed,
   getComments,
   createComment,
-  deleteComment
+  deleteComment,
+  addFavorite,
+  removeFavorite,
+  getUserFavorites,
+  checkFavorite
 } = require('../controllers/poemController');
 const path = require('path');
 const fs = require('fs');
@@ -84,7 +88,7 @@ router.post('/:id/like', likeLimiter, likePoem);
 
 // Comment routes
 router.get('/:id/comments', getComments);
-router.post('/:id/comments', auth, [
+router.post('/:id/comments', [
   body('text').trim().isLength({ min: 1, max: 1000 }).escape()
 ], (req, res, next) => {
   const errors = validationResult(req);
@@ -94,6 +98,12 @@ router.post('/:id/comments', auth, [
   next();
 }, createComment);
 router.delete('/comments/:id', auth, deleteComment);
+
+// Favorite routes
+router.post('/:id/favorite', auth, addFavorite);
+router.delete('/:id/favorite', auth, removeFavorite);
+router.get('/:id/favorite', auth, checkFavorite);
+router.get('/favorites/user', auth, getUserFavorites);
 
 // Add route for getting poem by id (for admin edit modal)
 router.get('/id/:id', auth, async (req, res) => {
