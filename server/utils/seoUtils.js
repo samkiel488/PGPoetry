@@ -19,7 +19,7 @@ function truncate(text, len = 150) {
 }
 
 function generateMetaTags(poem = {}, req = {}) {
-  const siteName = process.env.SITE_NAME || "PG'sPoeticPen";
+  const siteName = process.env.SITE_NAME || "PGpoetry";
   const title = poem.title ? `${poem.title} — ${siteName}` : `${siteName}`;
 
   const rawContent = poem.content || poem.body || '';
@@ -61,8 +61,8 @@ function generateMetaTags(poem = {}, req = {}) {
 
 function getShareLinks(poem = {}, req = {}) {
   const url = ensureAbsoluteUrl(req, req.originalUrl || (`/poem/${poem.slug || ''}`));
-  const title = poem.title || process.env.SITE_NAME || "PG'sPoeticPen";
-  const text = `Just read this amazing piece on ${process.env.SITE_NAME || "PG'sPoeticPen"} ✨: ${title}`;
+  const title = poem.title || process.env.SITE_NAME || "PGpoetry";
+  const text = `Just read this amazing piece on ${process.env.SITE_NAME || "PGpoetry"} ✨: ${title}`;
   const encodedUrl = encodeURIComponent(url);
   const encodedText = encodeURIComponent(text);
 

@@ -17,7 +17,7 @@ async function generateOgImageBuffer(title, siteName) {
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
   // Title text
-  const safeTitle = (title || siteName || "PG'sPoeticPen").replace(/\s+/g, ' ').trim();
+  const safeTitle = (title || siteName || "PGpoetry").replace(/\s+/g, ' ').trim();
 
   // Draw title (wrap)
   ctx.fillStyle = '#ffffff';
@@ -68,7 +68,7 @@ async function generateOgImageBuffer(title, siteName) {
   // Site name at bottom
   ctx.font = `600 20px Sans`;
   ctx.fillStyle = '#d1d5db';
-  ctx.fillText(siteName || "PG'sPoeticPen", WIDTH / 2, HEIGHT - 40);
+  ctx.fillText(siteName || "PGpoetry", WIDTH / 2, HEIGHT - 40);
 
   return canvas.toBuffer('image/png');
 }
@@ -87,7 +87,7 @@ async function getOrCreateOgImage(slug, title) {
     return filePath;
   }
 
-  const buf = await generateOgImageBuffer(title, process.env.SITE_NAME || "PG'sPoeticPen");
+  const buf = await generateOgImageBuffer(title, process.env.SITE_NAME || "PGpoetry");
   fs.writeFileSync(filePath, buf);
   return filePath;
 }

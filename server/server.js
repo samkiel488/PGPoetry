@@ -188,7 +188,7 @@ app.get('/og-image/:slug', async (req, res) => {
     }
 
     // Fallback SVG if generator fails
-    const title = (poem && poem.title) ? poem.title : (process.env.SITE_NAME || "PG'sPoeticPen");
+    const title = (poem && poem.title) ? poem.title : (process.env.SITE_NAME || "PGpoetry");
     const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     const svg = `<?xml version="1.0" encoding="UTF-8"?>
@@ -201,7 +201,7 @@ app.get('/og-image/:slug', async (req, res) => {
       </defs>
       <rect width="100%" height="100%" fill="url(#g)" />
       <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="'Playfair Display', serif" font-size="48" fill="#fff">${safeTitle}</text>
-      <text x="50%" y="90%" dominant-baseline="middle" text-anchor="middle" font-family="'Source Sans Pro', sans-serif" font-size="20" fill="#d1d5db">${process.env.SITE_NAME || "PG'sPoeticPen"}</text>
+      <text x="50%" y="90%" dominant-baseline="middle" text-anchor="middle" font-family="'Source Sans Pro', sans-serif" font-size="20" fill="#d1d5db">${process.env.SITE_NAME || "PGpoetry"}</text>
     </svg>`;
 
     res.set('Content-Type', 'image/svg+xml');
