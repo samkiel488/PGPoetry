@@ -2098,3 +2098,10 @@ body.dark .auth-form input::placeholder {
   }
 }
 
+/* Poem signature styles */
+.poem-signature {
+    text-align: left;
+    font-style: italic;
+    color: #7f8c8d;
+}
+

@@ -121,23 +121,38 @@ function getReadingTime(text) {
 function createPoemCard(poem) {
     try {
         log(`Creating poem card for: ${poem.title}`, 'info');
-        
-        // Show full content in the listing (no 'See more' behavior)
-        const excerpt = poem.content || '';
+
+        const fullContent = poem.content || '';
+        const signature = '\n\n©PGpoetry ✍';
+        let poemText = fullContent;
+        if (fullContent.endsWith(signature)) {
+            poemText = fullContent.slice(0, -signature.length);
+        }
+        const wordsArray = poemText.trim().split(/\s+/).filter(w => w.length > 0);
+        const wordCount = wordsArray.length;
+        let excerpt = poemText;
+        let readMoreLink = '';
+
+        if (wordCount > 29) {
+            excerpt = wordsArray.slice(0, 29).join(' ') + '...';
+            readMoreLink = `<a href="/poem/${poem.slug}" class="read-more-link">Read More</a>`;
+        }
+
         const tags = poem.tags ? poem.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : '';
-        const { words, minutes } = getReadingTime(poem.content);
+        const { minutes } = getReadingTime(poemText);
         const likes = poem.likes || 0;
         const views = poem.views || 0;
-        
+
         const isLiked = likedPoems.has(poem._id);
         const cardHTML = `
             <div class="poem-card" data-poem-slug="${poem.slug}">
                 <h3 class="poem-title">${poem.title}</h3>
-                <p class="poem-excerpt">${excerpt}</p>
+                <p class="poem-excerpt">${excerpt.replace(/\n/g, '<br>')}</p>
+                ${readMoreLink}
                 <div class="poem-meta">
                     <span class="poem-date">${formatDate(poem.createdAt)}</span>
                     <div class="poem-tags">${tags}</div>
-                    <span class="poem-words">${words} words</span>
+                    <span class="poem-words">${wordCount} words</span>
                     <span class="poem-reading">${minutes} min read</span>
                 </div>
                         <div class="poem-stats">
@@ -149,7 +164,7 @@ function createPoemCard(poem) {
                         </div>
             </div>
         `;
-        
+
         log(`Poem card created successfully for: ${poem.title}`, 'success');
         return cardHTML;
     } catch (error) {

@@ -470,11 +470,12 @@ async function loadPoem() {
         const { words, minutes } = calculateReadingStats(poem.content);
 
         // Convert plain-text poem content into paragraphs preserving line breaks
-        const paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => {
+        let paragraphs = (poem.content || '').trim().split(/\n\s*\n/).map(p => {
             // replace single newlines within a paragraph with <br>
             const inner = p.replace(/\n/g, '<br>');
             return `<p>${inner}</p>`;
         }).join('');
+        paragraphs += '<p class="poem-signature">©PGpoetry ✍</p>';
 
         const poemHTML = `
             <div class="poem-header">
@@ -1053,7 +1054,7 @@ function renderComments(comments) {
             return `
                 <div class="comment" data-comment-id="${comment._id}">
                     <div class="comment-header">
-                        <span class="comment-author">${comment.user ? comment.user.username : 'Anonymous'}</span>
+                        <span class="comment-author">${comment.username || 'Anonymous'}</span>
                         <span class="comment-date">${formatDate(comment.createdAt)}</span>
                         ${canDelete ? `<button class="comment-delete-btn" data-comment-id="${comment._id}" title="Delete comment">×</button>` : ''}
                     </div>

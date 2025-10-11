@@ -7,7 +7,12 @@ const slugify = require('slugify');
 const getAllPoems = async (req, res) => {
   try {
     const poems = await Poem.find().sort({ createdAt: -1 });
-    res.json(poems);
+    // Append signature to each poem content
+    const poemsWithSignature = poems.map(poem => ({
+      ...poem.toObject(),
+      content: poem.content + '\n\n©PGpoetry ✍'
+    }));
+    res.json(poemsWithSignature);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching poems' });
   }
@@ -43,6 +48,7 @@ const getPoemBySlug = async (req, res) => {
 
     res.json({
       ...poem.toObject(),
+      content: poem.content + '\n\n<strong>©PGpoetry ✍</strong>',
       relatedPoems
     });
   } catch (error) {
@@ -195,6 +201,7 @@ const createComment = async (req, res) => {
     const { id } = req.params;
     const { text } = req.body;
     const userId = req.user ? req.user._id : null;
+    const username = req.user ? req.user.username : null;
 
     // Verify poem exists
     const poem = await Poem.findById(id);
@@ -214,6 +221,7 @@ const createComment = async (req, res) => {
     const comment = new Comment({
       poemId: id,
       userId,
+      username,
       text: text.trim()
     });
 
